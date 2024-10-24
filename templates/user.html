@@ -3,12 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome to the Homepage</h1>
-    <p>This is the main page of the site.</p>
-    <a href="/about">Go to About Page</a>
+    <!-- User Information Section -->
+    <div class="user-info">
+        <h1>User Profile</h1>
+
+        <!-- Display User Clan -->
+        <div class="info-item">
+            <strong>Clan:</strong> <span id="clan">{{ user.clan }}</span>
+        </div>
+
+        <!-- Display User Money -->
+        <div class="info-item">
+            <strong>Money:</strong> <span id="money">{{ user.money }} gold</span>
+        </div>
+
+        <!-- Display User Inventory -->
+        <div class="info-item">
+            <strong>Inventory:</strong>
+            <ul id="inventory">
+                {% for item in user.inventory %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Display User XP -->
+        <div class="info-item">
+            <strong>XP:</strong> <span id="xp">{{ user.xp }}</span>
+        </div>
+
+        <!-- Display User ELO Rating -->
+        <div class="info-item">
+            <strong>ELO Rating:</strong> <span id="elo">{{ user.elo }}</span>
+        </div>
+
+        <!-- Display User Class -->
+        <div class="info-item">
+            <strong>Class:</strong> <span id="classe">{{ user.classe }}</span>
+        </div>
+    </div>
 </body>
 </html>

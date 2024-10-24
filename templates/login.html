@@ -8,13 +8,11 @@
 </head>
 <body>
 
-<!-- Button to open the modal login form -->
-<button onclick="document.getElementById('id01').style.display='block'">Login</button>
 
-<!-- The Modal -->
+<!-- Login Modal -->
 <div id="id01" class="modal">
     <!-- Modal Content -->
-    <form class="modal-content animate">
+    <form class="modal-content animate" action="/login">
         <div class="imgcontainer">
             <img src="{{ url_for('static', filename='ressources/login.jpg') }}" alt="Avatar" class="avatar">
         </div>
@@ -27,6 +25,38 @@
             <input type="password" placeholder="Enter Password" name="psw" required>
 
             <button type="submit">Login</button>
+        </div>
+    </form>
+</div>
+
+<!-- Registration Modal -->
+<div id="id02" class="modal">
+    <!-- Modal Content for Registration -->
+    <form class="modal-content animate" action="/register" method="post">
+        <div class="imgcontainer">
+            <img src="{{ url_for('static', filename='ressources/login.jpg') }}" alt="Avatar" class="avatar">
+        </div>
+
+        <div class="container">
+            <label for="name"><b>Full Name</b></label>
+            <input type="text" placeholder="Enter Your Name" name="name" required>
+
+            <label for="uname"><b>Username</b></label>
+            <input type="text" placeholder="Choose a Username" name="uname" required>
+
+            <label for="psw"><b>Password</b></label>
+            <input type="password" placeholder="Create a Password" name="psw" required>
+
+            <label for="classe"><b>Select Your Class</b></label>
+            <select name="classe" id="classe" required>
+                <option value="Warrior">Warrior</option>
+                <option value="Mage">Mage</option>
+                <option value="Rogue">Rogue</option>
+                <option value="Archer">Archer</option>
+                <option value="Healer">Healer</option>
+            </select>
+
+            <button type="submit">Create Account</button>
         </div>
     </form>
 </div>
