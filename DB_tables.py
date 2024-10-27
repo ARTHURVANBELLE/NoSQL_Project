@@ -1,18 +1,11 @@
 import boto3
 from botocore.exceptions import ClientError
 
+import dynamoConnect
 
-dynamodb_client = boto3.client('dynamodb', 
-                        endpoint_url='http://localhost:8000', 
-                        region_name='eu-west-1',
-                        aws_access_key_id='fakeMyKeyId',
-                        aws_secret_access_key='fakeSecretAccessKey')
+dynamodb_client = dynamoConnect.dynamodb_client
 
-dynamodb_resource = boto3.resource('dynamodb', 
-                        endpoint_url='http://localhost:8000', 
-                        region_name='eu-west-1',
-                        aws_access_key_id='fakeMyKeyId',
-                        aws_secret_access_key='fakeSecretAccessKey')
+dynamodb_resource = dynamoConnect.dynamodb_resource
 
 def table_exists(table_name):
     """Check if a DynamoDB table exists."""
@@ -55,8 +48,16 @@ user_keySchema = [
         {'AttributeName': 'user_id', 'KeyType': 'HASH'}
     ]
 user_attributeDefinitions = [
-        {'AttributeName': 'user_id', 'AttributeType': 'N'}
+        {'AttributeName': 'user_id', 'AttributeType': 'S'}
     ]
+
+# table_Users = "users"
+# user_keySchema = [
+#         {'AttributeName': 'user_id', 'KeyType': 'HASH'}
+#     ]
+# user_attributeDefinitions = [
+#         {'AttributeName': 'user_id', 'AttributeType': 'N'}
+#     ]
 
 table_Clans = "clans"
 clan_keySchema = [
@@ -146,24 +147,14 @@ def list_dynamodb_tables():
 # Call the function to print the tables
 list_dynamodb_tables()
 
-""" 
-try:
-    items = dynamodb_resource.Table('items')
-    # items.put_item(
-    #     Item =
-    #     {
-    #         'item_id': 'W1',
-    #         'item_name': 'Claymore'
-    #     }
-    # )
-    response = items.get_item(
-        Key={
-            'item_id': 'W1',
-            'item_name': 'Claymore'
-        }
-    )
 
-    item = response["item_name"]
-    print(item)
-except ClientError as e:
-    print('Error Code: {}'.format(e.response['Error']['Code']))"""
+# try:
+#     users_table = dynamodb_resource.Table("users")
+#     new_user = {
+#     "user_id": 2
+#     }
+#     users_table.put_item(Item=new_user)
+#     response = users_table.scan()
+#     print(response["Items"])
+# except ClientError as e:
+#     print('Error Code: {}'.format(e.response['Error']['Code']))
