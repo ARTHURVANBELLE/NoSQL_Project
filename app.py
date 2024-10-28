@@ -7,6 +7,8 @@ import dynamoConnect
 # Import the users_namespace from users.py
 from users import users_namespace
 
+from monsters import monsters_namespace
+
 app = Flask(__name__)
 api = Api(app, version='1.0', title='Game API', description='API for the game management')
 
