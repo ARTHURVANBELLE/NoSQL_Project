@@ -1,0 +1,4 @@
+flask
+flask_restx
+boto3
+botocore
