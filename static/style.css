@@ -20,3 +20,36 @@ a {
     border-radius: 50%;  /* Optional: makes the image circular */
 }
 
+table {
+    width: 100%;
+    border-collapse: collapse;  /* Combine borders */
+    margin-top: 20px;  /* Add space above the table */
+}
+
+th, td {
+    padding: 12px;  /* Add padding for better spacing */
+    text-align: left;  /* Align text to the left */
+    border-bottom: 1px solid #ddd;  /* Add a border below each row */
+}
+
+th {
+    background-color: #f2f2f2;  /* Light gray background for the header */
+}
+
+/* Button Styling */
+button {
+    padding: 8px 12px;  /* Button padding */
+    margin-left: 5px;  /* Spacing between buttons */
+    cursor: pointer;  /* Cursor pointer on hover */
+}
+
+/* Pagination Styling */
+.pagination {
+    margin-top: 20px;  /* Add space above pagination */
+    display: flex;  /* Use flexbox for layout */
+    justify-content: center;  /* Center pagination buttons */
+}
+
+#pageInfo {
+    margin: 0 15px;  /* Space around the page info */
+}
