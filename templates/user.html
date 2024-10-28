@@ -11,6 +11,11 @@
     <div class="user-info">
         <h1>User Profile</h1>
 
+        <!-- Display User Name -->
+        <div class="info-item">
+            <strong>Name:</strong> <span id="name">{{ user.name }}</span>
+        </div>
+
         <!-- Display User Clan -->
         <div class="info-item">
             <strong>Clan:</strong> <span id="clan">{{ user.clan }}</span>
@@ -21,14 +26,9 @@
             <strong>Money:</strong> <span id="money">{{ user.money }} gold</span>
         </div>
 
-        <!-- Display User Inventory -->
+        <!-- Display User Inventory ID -->
         <div class="info-item">
-            <strong>Inventory:</strong>
-            <ul id="inventory">
-                {% for item in user.inventory %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
+            <strong>Inventory ID:</strong> <span id="inventory_id">{{ user.inventory_id }}</span>
         </div>
 
         <!-- Display User XP -->
@@ -43,8 +43,48 @@
 
         <!-- Display User Class -->
         <div class="info-item">
-            <strong>Class:</strong> <span id="classe">{{ user.classe }}</span>
+            <strong>Class:</strong> <span id="class">{{ user.class }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+
+            <!-- Modify Button -->
+            <button onclick="modifyUser('{{ user.user_id }}')">Modify</button>
+
+            <!-- Delete Button -->
+            <button onclick="deleteUser('{{ user.user_id }}')">Delete</button>
         </div>
     </div>
+
+    <!-- Script to send the admin to a modify page corresponding to this user / Script to delete the user by using the right method & url -->
+    <script>
+        function modifyUser(userId) {
+            window.location.href = `/users_api/${userId}/edit`;  // Redirect to an edit page
+        }
+
+        function deleteUser(userId) {
+            console.log("Logging userId:", userId);  // Ensure correct userId is logged
+            const deleteUrl = `/users_api/${userId}`;  // Construct the URL with userId
+            console.log("Delete URL:", deleteUrl);
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`/users_api/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('User deleted successfully');
+                        window.location.href = '/users_api'; // Redirect after deletion
+                    } else {
+                        alert('Failed to delete user');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
 </body>
 </html>

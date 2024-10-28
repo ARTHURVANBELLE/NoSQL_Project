@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, render_template, jsonify, make_response
 from flask_restx import Api, Resource, fields, Namespace
 import boto3
 from botocore.exceptions import ClientError
@@ -35,14 +35,48 @@ def convert_decimals(obj):
     return obj
 
 
+@users_namespace.route('/users/')
+class UserList(Resource):
+    @users_namespace.doc('user_list')
+    def get(self):
+        """Render the user list page."""
+        try :
+            html_content = render_template('user_list.html')
+            response = make_response(html_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
+        except ClientError as e:
+            return {'message': str(e)}, 500
+
 @users_namespace.route('/')
 class UserList(Resource):
     @users_namespace.doc('list_users')
     def get(self):
-        """List all users"""
+        """List all users as JSON with pagination."""
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 20, type=int)
+        search = request.args.get('search', '', type=str)
+
         try:
+            # Scan all users
             response = users_table.scan()
-            return convert_decimals(response.get('Items', [])), 200
+            users = convert_decimals(response.get('Items', []))
+
+            # Filter users if a search term is provided
+            if search:
+                users = [user for user in users if search.lower() in user['name'].lower() or search.lower() in user['user_id'].lower()]
+
+            total_users = len(users)
+            # Apply pagination
+            start = (page - 1) * limit
+            end = start + limit
+            paginated_users = users[start:end]
+
+            return {
+                'users': paginated_users,
+                'total_users': total_users
+            }, 200
+
         except ClientError as e:
             return {'message': str(e)}, 500
 
@@ -69,9 +103,23 @@ class User(Resource):
         try:
             response = users_table.get_item(Key={'user_id': user_id})
             user = response.get('Item')
-            if not user:
+            user_data = {
+                "user_id": user_id,
+                "name": user.get('name', "Unknown"),
+                "clan": user.get('clan_id', "Unknown"),
+                "money": user.get('money', 0),
+                "inventory_id": user.get('inventory_id', 0),
+                "xp": user.get('xp', 0),
+                "elo": user.get('elo', 0),
+                "class": user.get('class', "Unknown")
+            }
+            if not user_data:
                 return {'message': 'User not found'}, 404
-            return convert_decimals(user), 200
+            
+            html_content = render_template('user.html', user=user_data)
+            response = make_response(html_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
         except ClientError as e:
             return {'message': str(e)}, 500
 
@@ -109,5 +157,34 @@ class User(Resource):
                 }
             )
             return {'message': 'User updated successfully'}, 200
+        except ClientError as e:
+            return {'message': str(e)}, 500
+
+@users_namespace.route('/<string:user_id>/edit')
+@users_namespace.param('user_id', 'The user identifier')
+class EditUser(Resource):
+    @users_namespace.doc('edit_user_page')
+    def get(self, user_id):
+        """Fetch user data for editing"""
+        try:
+            response = users_table.get_item(Key={'user_id': user_id})
+            user = response.get('Item')
+            if not user:
+                return {'message': 'User not found'}, 404
+            
+            user_data = {
+                "user_id": user['user_id'],
+                "name": user.get('name', "Unknown"),
+                "clan_id": user.get('clan_id', 0),
+                "money": user.get('money', 0),
+                "inventory_id": user.get('inventory_id', 0),
+                "xp": user.get('xp', 0),
+                "elo": user.get('elo', 0),
+                "class": user.get('class', "Unknown")
+            }
+            html_content = render_template('user_edit.html', user=user_data)
+            response = make_response(html_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
         except ClientError as e:
             return {'message': str(e)}, 500

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>User List</h1>
+
+        <!-- Search Bar -->
+        <div>
+            <input type="text" id="search" placeholder="Search by User ID or Name">
+            <button onclick="searchUsers()">Search</button>
+        </div>
+
+        <!-- User List Table -->
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Actions</th> <!-- Add an actions column for buttons -->
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- User data will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <button id="prevPage" onclick="changePage(currentPage - 1)">Previous</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" onclick="changePage(currentPage + 1)">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const limit = 20;  // Number of users per page
+        let totalUsers = 0;  // Total number of users
+        let totalPages = 0;  // Total number of pages
+
+        // Function to fetch users
+        function fetchUsers(page = 1, search = '') {
+            fetch(`/users_api/?page=${page}&limit=${limit}&search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    totalUsers = data.total_users; // Assuming the API returns total users
+                    totalPages = Math.ceil(totalUsers / limit);
+                    populateUserTable(data.users);
+                    updatePagination(page, totalPages);
+                })
+                .catch(error => console.error('Error fetching users:', error));
+        }
+
+        // Function to populate the user table
+        function populateUserTable(users) {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';  // Clear existing rows
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.user_id}</td>
+                    <td>${user.name}</td>
+                    <td>
+                        <button onclick="viewUser('${user.user_id}')">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to update pagination
+        function updatePagination(page, totalPages) {
+            currentPage = page;
+            document.getElementById('pageInfo').textContent = `Page ${page} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = page === 1;
+            document.getElementById('nextPage').disabled = page === totalPages || totalPages === 0;
+        }
+
+        // Function to change page
+        function changePage(page) {
+            if (page < 1 || page > totalPages) return; // Prevent invalid page numbers
+            fetchUsers(page);
+        }
+
+        // Function to search users
+        function searchUsers() {
+            const searchValue = document.getElementById('search').value;
+            fetchUsers(1, searchValue);  // Reset to page 1 when searching
+        }
+
+        // Function to view user details
+        function viewUser(userId) {
+            window.location.href = `/users_api/${userId}`; // Redirect to user detail page
+        }
+
+        // Initial fetch on page load
+        fetchUsers();
+    </script>
+</body>
+</html>

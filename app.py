@@ -13,10 +13,6 @@ api = Api(app, version='1.0', title='Game API', description='API for the game ma
 # Register the User API namespace
 api.add_namespace(users_namespace, path='/users_api')
 
-users_table = dynamoConnect.dynamodb_resource.Table("users")
-response = users_table.scan()
-print(response)
-
 with app.app_context():
     print("Registered routes:")
     for rule in app.url_map.iter_rules():
