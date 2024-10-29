@@ -41,7 +41,7 @@ class UserList(Resource):
     def get(self):
         """Render the user list page."""
         try :
-            html_content = render_template('user_list.html')
+            html_content = render_template('user_templates/user_list.html')
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response
@@ -86,11 +86,12 @@ class UserList(Resource):
         """Create a new user"""
         data = request.json
         # Generate a unique user_id
-        data['user_id'] = str(uuid.uuid4())  # Change this line to use UUID
+        data['user_id'] = str(uuid.uuid4())
         try:
             # Insert a new user into DynamoDB
             users_table.put_item(Item=data)
-            return {'message': 'User created successfully'}, 201
+            # Return a success message along with the new user's ID
+            return {'message': 'User created successfully', 'user_id': data['user_id']}, 201
         except ClientError as e:
             return {'message': str(e)}, 500
 
@@ -116,7 +117,7 @@ class User(Resource):
             if not user_data:
                 return {'message': 'User not found'}, 404
             
-            html_content = render_template('user.html', user=user_data)
+            html_content = render_template('user_templates/user.html', user=user_data)
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response
@@ -182,7 +183,7 @@ class EditUser(Resource):
                 "elo": user.get('elo', 0),
                 "class": user.get('class', "Unknown")
             }
-            html_content = render_template('user_edit.html', user=user_data)
+            html_content = render_template('user_templates/user_edit.html', user=user_data)
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response

@@ -38,8 +38,8 @@ def create_table(table_name, keySchema, attributeDefinitions):
             print(f"Table '{table_name}' created successfully.")
         except ClientError as e:
             print(f"Error creating table: {e}")
-    else:
-        print(f"Table '{table_name}' already exists. No need to create.")
+    # else:
+    #     print(f"Table '{table_name}' already exists. No need to create.")
 
 universalThroughPut = {'ReadCapacityUnits': 10,'WriteCapacityUnits': 10}
 
@@ -126,27 +126,6 @@ create_table(table_Inventories, inventory_keySchema, inventory_attributeDefiniti
 create_table(table_Items, item_keySchema, item_attributeDefinitions)
 # create_table(table_Weapons, weapon_keySchema, weapon_attributeDefinitions)
 # create_table(table_Armors, armor_keySchema, armor_attributeDefinitions)
-
-def list_dynamodb_tables():
-    try:
-        # Get the list of tables
-        response = dynamodb_client.list_tables()
-        
-        table_names = response.get('TableNames', [])
-        
-        if table_names:
-            print("Existing DynamoDB tables:")
-            for table in table_names:
-                print(table)
-        else:
-            print("No tables found.")
-    
-    except Exception as e:
-        print(f"Error listing tables: {e}")
-
-# Call the function to print the tables
-list_dynamodb_tables()
-
 
 # try:
 #     users_table = dynamodb_resource.Table("users")

@@ -15,10 +15,10 @@ api = Api(app, version='1.0', title='Game API', description='API for the game ma
 # Register the User API namespace
 api.add_namespace(users_namespace, path='/users_api')
 
-with app.app_context():
-    print("Registered routes:")
-    for rule in app.url_map.iter_rules():
-        print(f"{rule.methods} {rule.rule}")
+# with app.app_context():
+#     print("Registered routes:")
+#     for rule in app.url_map.iter_rules():
+#         print(f"{rule.methods} {rule.rule}")
 
 if __name__ == '__main__':
     app.run(debug=True)
