@@ -6,6 +6,7 @@ import dynamoConnect
 
 # Import the users_namespace from users.py
 from users import users_namespace
+from clans import clans_namespace
 
 from monsters import monsters_namespace
 
@@ -14,6 +15,7 @@ api = Api(app, version='1.0', title='Game API', description='API for the game ma
 
 # Register the User API namespace
 api.add_namespace(users_namespace, path='/users_api')
+api.add_namespace(clans_namespace, path='/clans_api')
 
 # with app.app_context():
 #     print("Registered routes:")

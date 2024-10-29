@@ -49,8 +49,8 @@ class UserList(Resource):
             return {'message': str(e)}, 500
 
 @users_namespace.route('/')
-class UserList(Resource):
-    @users_namespace.doc('list_users')
+class Clans(Resource):
+    @users_namespace.doc('all_users')
     def get(self):
         """List all users as JSON with pagination."""
         page = request.args.get('page', 1, type=int)
