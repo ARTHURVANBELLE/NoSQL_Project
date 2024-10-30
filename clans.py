@@ -12,12 +12,13 @@ from decimal import Decimal
 clans_namespace = Namespace('v1/clans', description='Clan operations')
 
 clans_table = dynamoConnect.dynamodb_resource.Table("clans")
+users_table = dynamoConnect.dynamodb_resource.Table("users")
 
 # Define the clan model for the Swagger UI
 clan_model = clans_namespace.model('Clan', {
     'clan_id': fields.String(required=True, description='Unique clan identifier'),
     'name': fields.String(required=True, description='Clan Name'),
-    'user_id_list': fields.String(required=True, description='String representing all the user ids separated by a ;'),
+    'user_id_list': fields.String(required=False, description='String representing all the user ids separated by a ;'),
     'money': fields.Integer(required=True, description='Money accumulated by the clan'),
     'level': fields.Integer(required=True, descritpion='Level of the clan')
 })
@@ -100,6 +101,21 @@ class Clan(Resource):
         try:
             response = clans_table.get_item(Key={'clan_id': clan_id})
             clan = response.get('Item')
+            if not clan:
+                return {'message': 'Clan not found'}, 404
+            
+            user_id_list = clan.get('user_id_list', "").split(';')
+            users = []
+            for user_id in user_id_list:
+                if user_id:
+                    user_response = users_table.get_item(Key={'user_id': user_id})
+                    user = user_response.get('Item')
+                    if user:
+                        users.append({
+                            'user_id': user_id,
+                            'name': user.get('name', 'Unknown')
+                        })
+
             clan_data = {
                 "clan_id": clan_id,
                 "name": clan.get('name', "Unknown"),
@@ -110,7 +126,7 @@ class Clan(Resource):
             if not clan_data:
                 return {'message': 'Clan not found'}, 404
             
-            html_content = render_template('clan_templates/clan.html', clan=clan_data)
+            html_content = render_template('clan_templates/clan.html', clan=clan_data, users=users)
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response

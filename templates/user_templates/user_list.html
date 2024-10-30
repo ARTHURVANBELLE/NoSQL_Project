@@ -16,17 +16,32 @@
             <button onclick="searchUsers()">Search</button>
             <button onclick="openAddUserForm()">Add new user</button>
         </div>
-
+        
         <!-- New User Form (Hidden by Default) -->
         <div id="addUserForm" style="display:none;">
             <h3>Create New User</h3>
-            <input type="text" id="newName" placeholder="Name" required>
-            <input type="number" id="newClanId" placeholder="Clan ID" required>
-            <input type="number" id="newMoney" placeholder="Money" required>
-            <input type="number" id="newInventoryId" placeholder="Inventory ID" required>
-            <input type="number" id="newXp" placeholder="XP" required>
-            <input type="number" id="newElo" placeholder="Elo" required>
-            <input type="text" id="newClass" placeholder="Class" required>
+            <div class="form-field">
+                <input type="text" id="newName" placeholder="Name" required>
+            </div>
+            <div class="form-field">
+                <input type="string" id="newClanId" placeholder="Clan ID" onblur="checkClanExists()">
+                <small id="clanError" style="color: red; display: none;">Clan ID does not exist.</small>
+            </div>
+            <div class="form-field">
+                <input type="number" id="newMoney" placeholder="Money" required>
+            </div>
+            <div class="form-field">
+                <input type="number" id="newInventoryId" placeholder="Inventory ID" required>
+            </div>
+            <div class="form-field">
+                <input type="number" id="newXp" placeholder="XP" required>
+            </div>
+            <div class="form-field">
+                <input type="number" id="newElo" placeholder="Elo" required>
+            </div>
+            <div class="form-field">
+                <input type="text" id="newClass" placeholder="Class" required>
+            </div>
             <button onclick="addUser()">Submit</button>
             <button onclick="closeAddUserForm()">Cancel</button>
         </div>
@@ -123,10 +138,34 @@
             document.getElementById('addUserForm').style.display = 'none';
         }
 
+        function checkClanExists() {
+            const clanId = document.getElementById('newClanId').value.trim();
+            if (!clanId) {
+                clanExists = true;
+                document.getElementById('clanError').style.display = 'none';
+                return;
+            }
+            fetch(`/clans_api/${clanId}`)
+                .then(response => {
+                    clanExists = response.ok;
+                    document.getElementById('clanError').style.display = clanExists ? 'none' : 'block';
+                })
+                .catch(error => {
+                    console.error('Error checking clan:', error);
+                    clanExists = false;
+                    document.getElementById('clanError').style.display = 'block';
+                });
+        }
+
         function addUser() {
+            if (!clanExists) {
+                alert('Please enter a valid Clan ID or leave it empty.');
+                return;
+            }
+
             const newUser = {
                 name: document.getElementById('newName').value,
-                clan_id: parseInt(document.getElementById('newClanId').value),
+                clan_id: document.getElementById('newClanId').value || null,
                 money: parseInt(document.getElementById('newMoney').value),
                 inventory_id: parseInt(document.getElementById('newInventoryId').value),
                 xp: parseInt(document.getElementById('newXp').value),
@@ -134,7 +173,6 @@
                 class: document.getElementById('newClass').value
             };
 
-            // POST request to create new user
             fetch('/users_api/', {
                 method: 'POST',
                 headers: {
@@ -147,10 +185,7 @@
                 if (data.message === 'User created successfully') {
                     alert('User created successfully');
                     closeAddUserForm();
-
-                    // Assuming data includes the new user's ID, redirect to the edit page
-                    const newUserId = data.user_id;
-                    window.location.href = `/users_api/${newUserId}/edit`;
+                    window.location.href = `/users_api/${data.user_id}`;
                 } else {
                     alert('Failed to create user: ' + data.message);
                 }
