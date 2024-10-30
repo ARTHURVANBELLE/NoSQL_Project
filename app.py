@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify
-from flask import Flask
 from flask_restx import Api
 import DB_tables  # This will execute the creation of the tables
 import dynamoConnect
@@ -7,6 +6,7 @@ import dynamoConnect
 # Import the users_namespace from users.py
 from users import users_namespace
 from items import items_namespace
+from clans import clans_namespace
 
 from monsters import monsters_namespace
 
@@ -16,6 +16,7 @@ api = Api(app, version='1.0', title='Game API', description='API for the game ma
 # Register the User API namespace
 api.add_namespace(users_namespace, path='/users_api')
 api.add_namespace(items_namespace, path='/items_api')
+api.add_namespace(clans_namespace, path='/clans_api')
 
 # with app.app_context():
 #     print("Registered routes:")

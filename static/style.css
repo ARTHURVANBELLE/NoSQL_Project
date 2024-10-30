@@ -53,3 +53,22 @@ button {
 #pageInfo {
     margin: 0 15px;  /* Space around the page info */
 }
+
+.form-field {
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    position: relative;  /* So the error message appears below */
+}
+
+/* Style for the error message */
+#clanError {
+    position: absolute;
+    top: 100%;  /* Position below the Clan ID field */
+    left: 0;
+    width: 100%;  /* Make it the same width as the input field */
+    font-size: 0.9em;
+    margin-top: 4px;  /* Adds a bit of space from the input field */
+    color: red;
+    display: none; /* Hidden by default, shown by JavaScript */
+}

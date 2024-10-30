@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Clan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Edit Clan</h1>
+    <form id="editClanForm" onsubmit="submitForm(event)">
+        <input type="hidden" name="clan_id" value="{{ clan.clan_id }}">
+
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ clan.name }}" required>
+        </div>
+
+        <div>
+            <label for="user_id_list">User IDs (semicolon-separated):</label>
+            <input type="text" id="user_id_list" name="user_id_list" value="{{ clan.user_id_list }}" required>
+        </div>
+        <div>
+            <label for="money">Money:</label>
+            <input type="number" id="money" name="money" value="{{ clan.money }}" required>
+        </div>
+        <div>
+            <label for="level">Level:</label>
+            <input type="number" id="level" name="level" value="{{ clan.level }}" required>
+        </div>
+        <button type="submit">Update Clan</button>
+    </form>
+
+    <script>
+        function submitForm(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('editClanForm');
+            const formData = new FormData(form);
+            const clanId = formData.get('clan_id');
+
+            fetch(`/clans_api/${clanId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.get('name'),
+                    user_id_list: formData.get('user_id_list'),
+                    money: parseInt(formData.get('money')),
+                    level: parseInt(formData.get('level'))
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Clan updated successfully');
+                    window.location.href = `/clans_api/${clanId}`;
+                } else {
+                    alert('Failed to update clan');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

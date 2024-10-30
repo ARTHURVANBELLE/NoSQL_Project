@@ -64,7 +64,7 @@ clan_keySchema = [
         {'AttributeName': 'clan_id', 'KeyType': 'HASH'}
     ]
 clan_attributeDefinitions = [
-        {'AttributeName': 'clan_id', 'AttributeType': 'N'}
+        {'AttributeName': 'clan_id', 'AttributeType': 'S'}
     ]
 
 table_Monsters = "monsters"
@@ -82,7 +82,7 @@ inventory_keySchema = [
         {'AttributeName': 'inventory_id', 'KeyType': 'HASH'}
     ]
 inventory_attributeDefinitions = [
-        {'AttributeName': 'inventory_id', 'AttributeType': 'N'}
+        {'AttributeName': 'inventory_id', 'AttributeType': 'S'}
     ]
 
 # Items are composed of an ID (partition key) representing the type and the nbr of the item (for ex : "W1" for the 1st weapon)
