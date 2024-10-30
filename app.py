@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify
-from flask import Flask
 from flask_restx import Api
 import DB_tables  # This will execute the creation of the tables
 import dynamoConnect
