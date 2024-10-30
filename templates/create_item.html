@@ -3,111 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .input-row input {
-            width: 100%;
-            box-sizing: border-box;
-        }
-    </style>
+    <title>Items</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
 </head>
-<body>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-3xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+        <div class="px-6 py-4">
+            <h1 class="text-2xl font-bold mb-4">Items</h1>
+            
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 bg-gray-200 border-b">Name</th>
+                        <th class="px-4 py-2 bg-gray-200 border-b">ID</th>
+                        <th class="px-4 py-2 bg-gray-200 border-b">Rarity</th>
+                        <th class="px-4 py-2 bg-gray-200 border-b">Properties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="px-4 py-2 border-b">{{ item['item_name'] }}</td>
+                        <td class="px-4 py-2 border-b">{{ item['item_id'] }}</td>
+                        <td class="px-4 py-2 border-b">{{ item['item_rarity'] }}</td>
+                        <td class="px-4 py-2 border-b">{{ item['item_properties'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="mt-4">
+                <h2 class="text-lg font-bold mb-2">Add New Item</h2>
+                <form id="itemForm">
+                    <div class="mb-2">
+                        <label for="newItemName" class="block font-medium mb-1">Name</label>
+                        <input type="text" id="newItemName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item name">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newItemId" class="block font-medium mb-1">ID (eg:connsumable001)</label>
+                        <input type="text" id="newItemId" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item ID">
+                    </div>
+                    <div class="mb-2">
+                        <label for="newItemRarity" class="block font-medium mb-1">Rarity</label>
+                        <input type="text" id="newItemRarity" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item rarity">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block font-medium mb-1">Properties</label>
+                        <div id="propertyFields">
+                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" placeholder="Enter item property">
+                        </div>
+                        <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2" onclick="addPropertyField()">Add Another Property</button>
+                    </div>
+                    <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addItem()">Add Item</button>
 
-<h1>Item List</h1>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Rarity</th>
-            <th>Object Properties</th>
-        </tr>
-    </thead>
-    <tbody id="itemTableBody">
-        <tr>
-            <td>Excalibur</td>
-            <td>Sword</td>
-            <td>Legendary</td>
-            <td>Magic, Sharp</td>
-        </tr>
-        <tr>
-            <td>Healing Potion</td>
-            <td>Consumable</td>
-            <td>Common</td>
-            <td>Restores HP</td>
-        </tr>
-        <tr>
-            <td>Shadow Cloak</td>
-            <td>Armor</td>
-            <td>Rare</td>
-            <td>Stealth, Agility</td>
-        </tr>
-        <!-- Input row for adding a new item -->
-        <tr class="input-row">
-            <td><input type="text" id="newItemName" placeholder="Enter item name"></td>
-            <td><input type="text" id="newItemType" placeholder="Enter item type"></td>
-            <td><input type="text" id="newItemRarity" placeholder="Enter item rarity"></td>
-            <td><input type="text" id="newItemProperties" placeholder="Enter object properties"></td>
-            <td><button onclick="addItem()">Add Item</button></td>
-        </tr>
-    </tbody>
-</table>
+    <script>
+function addItem() {
+    const name = document.getElementById('newItemName').value;
+    const id = document.getElementById('newItemId').value;
+    const rarity = document.getElementById('newItemRarity').value;
 
-<script>
-    function addItem() {
-        // Get values from input fields
-        const name = document.getElementById('newItemName').value;
-        const type = document.getElementById('newItemType').value;
-        const rarity = document.getElementById('newItemRarity').value;
-        const properties = document.getElementById('newItemProperties').value;
+    // Get all property inputs
+    const propertyInputs = document.querySelectorAll('#propertyFields input');
+    const properties = Array.from(propertyInputs).map(input => input.value).filter(value => value);
 
-        // Validate input
-        if (name && type && rarity && properties) {
-            // Create a new row
-            const tableBody = document.getElementById('itemTableBody');
-            const newRow = document.createElement('tr');
-
-            newRow.innerHTML = `
-                <td>${name}</td>
-                <td>${type}</td>
-                <td>${rarity}</td>
-                <td>${properties}</td>
-            `;
-
-            // Append new row to the table
-            tableBody.appendChild(newRow);
-
-            // Clear input fields
-            document.getElementById('newItemName').value = '';
-            document.getElementById('newItemType').value = '';
-            document.getElementById('newItemRarity').value = '';
-            document.getElementById('newItemProperties').value = '';
-        } else {
-            alert('Please fill in all fields.');
-        }
+    if (name && id && rarity && properties) {
+        fetch('/items_api/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                item_name: name, 
+                item_id: id,
+                item_rarity: rarity,
+                item_properties: properties
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reload the page to show the new item
+            location.reload();
+        })
+        .catch(error => {
+            alert(`Error: ${error}`);
+        });
+    } else {
+        alert('Please fill in all fields.');
     }
-</script>
+}
 
+function addPropertyField() {
+    const propertyFields = document.getElementById('propertyFields');
+    const newField = document.createElement('input');
+    newField.type = 'text';
+    newField.placeholder = 'Enter item property';
+    newField.className = 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2';
+    propertyFields.appendChild(newField);
+}
+
+    </script>
 </body>
 </html>
