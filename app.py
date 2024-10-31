@@ -24,8 +24,6 @@ api.add_namespace(monsters_namespace, path='/monsters_api')
 #     for rule in app.url_map.iter_rules():
 #         print(f"{rule.methods} {rule.rule}")
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)
 
