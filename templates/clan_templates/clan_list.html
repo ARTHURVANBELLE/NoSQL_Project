@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clan List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Clan List</h1>
+
+        <!-- Search Bar -->
+        <div>
+            <input type="text" id="search" placeholder="Search by Clan ID or Name">
+            <button onclick="searchClans()">Search</button>
+            <button onclick="openAddClanForm()">Add new clan</button>
+        </div>
+
+        <!-- New Clan Form (Hidden by Default) -->
+        <div id="addClanForm" style="display:none;">
+            <h3>Create New Clan</h3>
+            <input type="text" id="newClanName" placeholder="Name" required>
+            <input type="number" id="newMoney" placeholder="Money" required>
+            <input type="text" id="newUserIdList" placeholder="User IDs (semicolon-separated)">
+            <input type="number" id="newLevel" placeholder="Level" required>
+            <button onclick="addClan()">Submit</button>
+            <button onclick="closeAddClanForm()">Cancel</button>
+        </div>
+
+        <!-- Clan List Table -->
+        <table id="clanTable">
+            <thead>
+                <tr>
+                    <th>Clan ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="clanTableBody"></tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <button id="prevPage" onclick="changePage(currentPage - 1)">Previous</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage" onclick="changePage(currentPage + 1)">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const limit = 20;
+        let totalClans = 0;
+        let totalPages = 0;
+
+        function fetchClans(page = 1, search = '') {
+            fetch(`/clans_api/?page=${page}&limit=${limit}&search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    totalClans = data.total_clans;
+                    totalPages = Math.ceil(totalClans / limit);
+                    populateClanTable(data.clans);
+                    updatePagination(page, totalPages);
+                })
+                .catch(error => console.error('Error fetching clans:', error));
+        }
+
+        function populateClanTable(clans) {
+            const tableBody = document.getElementById('clanTableBody');
+            tableBody.innerHTML = '';
+
+            clans.forEach(clan => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${clan.clan_id}</td>
+                    <td>${clan.name}</td>
+                    <td>
+                        <button onclick="viewClan('${clan.clan_id}')">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updatePagination(page, totalPages) {
+            currentPage = page;
+            document.getElementById('pageInfo').textContent = `Page ${page} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = page === 1;
+            document.getElementById('nextPage').disabled = page === totalPages || totalPages === 0;
+        }
+
+        function changePage(page) {
+            if (page < 1 || page > totalPages) return;
+            fetchClans(page);
+        }
+
+        function searchClans() {
+            const searchValue = document.getElementById('search').value;
+            fetchClans(1, searchValue);
+        }
+
+        function viewClan(clanId) {
+            window.location.href = `/clans_api/${clanId}`;
+        }
+
+        // Function to open the form to add a new clan
+        function openAddClanForm() {
+            document.getElementById('addClanForm').style.display = 'block';
+        }
+
+        // Function to close the form to add a new clan
+        function closeAddClanForm() {
+            document.getElementById('addClanForm').style.display = 'none';
+        }
+
+        // Function to add a new clan
+        function addClan() {
+            const newClan = {
+                name: document.getElementById('newClanName').value,
+                money: parseInt(document.getElementById('newMoney').value),
+                user_id_list: document.getElementById('newUserIdList').value,
+                level: parseInt(document.getElementById('newLevel').value),
+            };
+
+            fetch('/clans_api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newClan)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Clan created successfully') {
+                    alert('Clan created successfully');
+                    closeAddClanForm();
+                    const newClanId = data.clan_id;
+                    window.location.href = `/clans_api/${newClanId}`;
+                } else {
+                    alert('Failed to create clan: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Initial fetch on page load
+        fetchClans();
+    </script>
+</body>
+</html>

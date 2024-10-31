@@ -21,7 +21,7 @@ def table_exists(table_name):
             print(f"Error occurred: {e}")
             return False
 
-def create_table(table_name, keySchema, attributeDefinitions):
+def create_table(table_name, keySchema, attributeDefinitions, constant_elements = None):
     """Create a DynamoDB table if it doesn't exist."""
     if not table_exists(table_name):
         try:
@@ -36,6 +36,19 @@ def create_table(table_name, keySchema, attributeDefinitions):
             # Wait until the table is created
             dynamodb_client.get_waiter('table_exists').wait(TableName=table_name)
             print(f"Table '{table_name}' created successfully.")
+
+            if constant_elements:
+
+                table = dynamoConnect.dynamodb_resource.Table(table_name)
+
+                for element in constant_elements:
+                    if table_name == "user_classes":
+                        new_user_class = {
+                            "user_class": element
+                        }
+
+                        table.put_item(Item=new_user_class)
+
         except ClientError as e:
             print(f"Error creating table: {e}")
     # else:
@@ -64,7 +77,7 @@ clan_keySchema = [
         {'AttributeName': 'clan_id', 'KeyType': 'HASH'}
     ]
 clan_attributeDefinitions = [
-        {'AttributeName': 'clan_id', 'AttributeType': 'N'}
+        {'AttributeName': 'clan_id', 'AttributeType': 'S'}
     ]
 
 table_Monsters = "monsters"
@@ -82,7 +95,7 @@ inventory_keySchema = [
         {'AttributeName': 'inventory_id', 'KeyType': 'HASH'}
     ]
 inventory_attributeDefinitions = [
-        {'AttributeName': 'inventory_id', 'AttributeType': 'N'}
+        {'AttributeName': 'inventory_id', 'AttributeType': 'S'}
     ]
 
 # Items are composed of an ID (partition key) representing the type and the nbr of the item (for ex : "W1" for the 1st weapon)
@@ -127,13 +140,16 @@ create_table(table_Items, item_keySchema, item_attributeDefinitions)
 # create_table(table_Weapons, weapon_keySchema, weapon_attributeDefinitions)
 # create_table(table_Armors, armor_keySchema, armor_attributeDefinitions)
 
-# try:
-#     users_table = dynamodb_resource.Table("users")
-#     new_user = {
-#     "user_id": 2
-#     }
-#     users_table.put_item(Item=new_user)
-#     response = users_table.scan()
-#     print(response["Items"])
-# except ClientError as e:
-#     print('Error Code: {}'.format(e.response['Error']['Code']))
+table_User_Classes = "user_classes"
+user_classes_keySchema = [
+        {'AttributeName': 'user_class', 'KeyType': 'HASH'}
+    ]
+user_classes_attributeDefinitions = [
+        {'AttributeName': 'user_class', 'AttributeType': 'S'}
+    ]
+
+user_classes = [
+    "warrior", "mage", "priest", "ranger", "paladin"
+]
+
+create_table(table_User_Classes, user_classes_keySchema, user_classes_attributeDefinitions, user_classes)
