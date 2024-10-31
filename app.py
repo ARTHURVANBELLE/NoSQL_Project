@@ -17,6 +17,7 @@ api = Api(app, version='1.0', title='Game API', description='API for the game ma
 api.add_namespace(users_namespace, path='/users_api')
 api.add_namespace(items_namespace, path='/items_api')
 api.add_namespace(clans_namespace, path='/clans_api')
+api.add_namespace(monsters_namespace, path='/monsters_api')
 
 # with app.app_context():
 #     print("Registered routes:")

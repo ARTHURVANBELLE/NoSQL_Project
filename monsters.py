@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, render_template, jsonify, make_response
 from flask_restx import Api, Resource, fields, Namespace
 import boto3
 from botocore.exceptions import ClientError
@@ -33,17 +33,56 @@ def convert_decimals(obj):
     return obj
 
 
-@monsters_namespace.route('/')
+@monsters_namespace.route('/monsters')
 class MonsterList(Resource):
     @monsters_namespace.doc('list_monsters')
     def get(self):
         """List all monsters"""
+        #Render the monster_List page
         try:
-            response = monsters_table.scan()
-            return convert_decimals(response.get('Items', [])), 200
+            html_content = render_template('monster_templates/monster_list.html')
+            response = make_response(html_content)
+            #response = monsters_table.scan()
+            #return convert_decimals(response.get('Items', [])), 200
+            response.headers['Content-Type'] = 'text/html'
+            return response
         except ClientError as e:
             return {'message': str(e)}, 500
 
+
+        
+@monsters_namespace.route('/')
+class Monsters(Resource):
+    @monsters_namespace.doc('all_monsters')
+    def get(self):
+        """List all monsters as JSON with pagination"""
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 20, type=int)
+        search = request.args.get('search', '', type=str)
+
+        try:
+
+            #Scan all tables
+            response = monsters_table.scan()
+            monsters = convert_decimals(response.get('Items', []))
+
+            # Filter a monster if a search term is provided
+            if search:
+                monsters = [monster for monster in monsters if search.lower() in monster['name'].lower() or search.lower() in monster['monster_id'].lower()]
+            total_monsters = len(monsters)
+
+            #Apply pagination
+            start = (page - 1) * limit
+            end = start + limit
+            paginated_monsters = monsters[start:end]
+
+            return {
+                'monsters' : paginated_monsters,
+                'total_monsters' : total_monsters
+            }, 200
+        except ClientError as e:
+            return {'message': str(e)}, 500
+        
     @monsters_namespace.doc('create_monster')
     @monsters_namespace.expect(monster_model)
     def post(self):
@@ -57,6 +96,7 @@ class MonsterList(Resource):
             return {'message': 'Monster created successfully'}, 201
         except ClientError as e:
             return {'message': str(e)}, 500
+
 
 @monsters_namespace.route('/<string:monster_id>')
 @monsters_namespace.param('monster_id', 'The monster identifier')
