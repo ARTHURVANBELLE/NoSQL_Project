@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Données - Home</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="home.html" class="logo">Accueil</a>
+            <a href="user_templates/user_list.html">User</a>
+            <a href="create_item.html">Items</a>
+            <a href="monster_templates/monster_list.html">Monsters</a>
+            <a href="clan_templates/clan_list.html">Clan</a>
+            <a href="inventories.html">Inventories</a>
+        </div>
+        <div class="nav-right">
+            <a href="login.html" class="btn-login">Login</a>
+            <a href="register.html" class="btn-register">Register</a>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Welcome to home page</h1>
+        <p>Explore the sections to manage the users, items, monsters, clans and inventories.</p>
+    </main>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 10px 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            margin-right: 5px;
+        }
+
+        .navbar .nav-left a:hover {
+            background-color: #555;
+        }
+
+        .navbar .nav-right a {
+            background-color: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        .navbar .nav-right a:hover {
+            background-color: #0056b3;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</body>
+</html>
