@@ -16,9 +16,10 @@
             <strong>Name:</strong> <span id="name">{{ user.name }}</span>
         </div>
 
-        <!-- Display User Clan -->
+        <!-- Display User Clan ID -->
         <div class="info-item">
-            <strong>Clan:</strong> <span id="clan">{{ user.clan }}</span>
+            <strong>Clan ID:</strong>
+            <span id="clan_id">{{ user.clan_id if user.clan_id else 'None' }}</span>
         </div>
 
         <!-- Display User Money -->
@@ -43,7 +44,7 @@
 
         <!-- Display User Class -->
         <div class="info-item">
-            <strong>Class:</strong> <span id="class">{{ user.class }}</span>
+            <strong>User Class:</strong> <span id="user_class">{{ user.user_class }}</span>
         </div>
 
         <!-- Action Buttons -->

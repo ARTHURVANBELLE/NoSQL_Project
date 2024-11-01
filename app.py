@@ -8,6 +8,7 @@ from users import users_namespace
 from items import items_namespace
 from clans import clans_namespace
 
+from inventories import inventory_namespace
 from monsters import monsters_namespace
 
 app = Flask(__name__)
@@ -18,13 +19,13 @@ api.add_namespace(users_namespace, path='/users_api')
 api.add_namespace(items_namespace, path='/items_api')
 api.add_namespace(clans_namespace, path='/clans_api')
 api.add_namespace(monsters_namespace, path='/monsters_api')
+api.add_namespace(monsters_namespace, path='/monsters_api')
+api.add_namespace(inventory_namespace, path='/inventory_api')
 
 # with app.app_context():
 #     print("Registered routes:")
 #     for rule in app.url_map.iter_rules():
-#         print(f"{rule.methods} {rule.rule}")
-
-
+#         print(f"{rule.methods} {rule.rule}") 
 
 if __name__ == '__main__':
     app.run(debug=True)

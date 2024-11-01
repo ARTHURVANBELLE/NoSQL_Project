@@ -40,7 +40,10 @@
                 <input type="number" id="newElo" placeholder="Elo" required>
             </div>
             <div class="form-field">
-                <input type="text" id="newClass" placeholder="Class" required>
+                <select id="newUserClass" required>
+                    <option value="" disabled selected>Select User Class</option>
+                    <!-- Options will be populated here dynamically -->
+                </select>
             </div>
             <button onclick="addUser()">Submit</button>
             <button onclick="closeAddUserForm()">Cancel</button>
@@ -130,8 +133,28 @@
             window.location.href = `/users_api/${userId}`; // Redirect to user detail page
         }
 
+        function fetchUserClasses() {
+            fetch('/users_api/user_classes')
+                .then(response => response.json())
+                .then(data => {
+                    const userClassDropdown = document.getElementById('newUserClass');
+                    userClassDropdown.innerHTML = '<option value="" disabled selected>Select User Class</option>'; // Reset dropdown
+                
+                    // Populate dropdown with fetched user classes
+                    data.user_classes.forEach(userClass => {
+                        const option = document.createElement('option');
+                        option.value = userClass.user_class;  // Ensure this matches your database field
+                        option.textContent = userClass.user_class;
+                        userClassDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching user classes:', error));
+        }
+        
+        // Call fetchUserClasses when form is opened
         function openAddUserForm() {
             document.getElementById('addUserForm').style.display = 'block';
+            fetchUserClasses();  // Populate user classes in the dropdown
         }
 
         function closeAddUserForm() {
@@ -141,56 +164,55 @@
         function checkClanExists() {
             const clanId = document.getElementById('newClanId').value.trim();
             if (!clanId) {
-                clanExists = true;
                 document.getElementById('clanError').style.display = 'none';
                 return;
             }
+
             fetch(`/clans_api/${clanId}`)
                 .then(response => {
-                    clanExists = response.ok;
+                    const clanExists = response.ok;
                     document.getElementById('clanError').style.display = clanExists ? 'none' : 'block';
                 })
                 .catch(error => {
                     console.error('Error checking clan:', error);
-                    clanExists = false;
                     document.getElementById('clanError').style.display = 'block';
                 });
         }
 
         function addUser() {
-            if (!clanExists) {
+            const clanId = document.getElementById('newClanId').value.trim();
+            if (!clanId || document.getElementById('clanError').style.display === 'none') {
+                const newUser = {
+                    name: document.getElementById('newName').value,
+                    clan_id: clanId || null,
+                    money: parseInt(document.getElementById('newMoney').value),
+                    inventory_id: parseInt(document.getElementById('newInventoryId').value),
+                    xp: parseInt(document.getElementById('newXp').value),
+                    elo: parseInt(document.getElementById('newElo').value),
+                    user_class: document.getElementById('newUserClass').value
+                };
+
+                fetch('/users_api/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newUser)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'User created successfully') {
+                        alert('User created successfully');
+                        closeAddUserForm();
+                        window.location.href = `/users_api/${data.user_id}`;
+                    } else {
+                        alert('Failed to create user: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
                 alert('Please enter a valid Clan ID or leave it empty.');
-                return;
             }
-
-            const newUser = {
-                name: document.getElementById('newName').value,
-                clan_id: document.getElementById('newClanId').value || null,
-                money: parseInt(document.getElementById('newMoney').value),
-                inventory_id: parseInt(document.getElementById('newInventoryId').value),
-                xp: parseInt(document.getElementById('newXp').value),
-                elo: parseInt(document.getElementById('newElo').value),
-                class: document.getElementById('newClass').value
-            };
-
-            fetch('/users_api/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newUser)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'User created successfully') {
-                    alert('User created successfully');
-                    closeAddUserForm();
-                    window.location.href = `/users_api/${data.user_id}`;
-                } else {
-                    alert('Failed to create user: ' + data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
         }
 
         // Initial fetch on page load
