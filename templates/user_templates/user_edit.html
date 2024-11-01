@@ -18,7 +18,7 @@
 
         <div>
             <label for="clan_id">Clan ID:</label>
-            <input type="text" id="clan_id" name="clan_id" value="{{ user.clan_id }}">
+            <input type="text" id="clan_id" name="clan_id" value="{{ user.clan_id if user.clan_id else '' }}">
         </div>
         <div>
             <label for="money">Money:</label>
