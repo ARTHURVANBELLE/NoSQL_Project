@@ -12,6 +12,18 @@ services:
     working_dir: /home/dynamodblocal
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
 
+  dynamodb-admin:
+    container_name: dynamodb-admin
+    image: aaronshaf/dynamodb-admin
+    networks:
+      - local-dynamodb
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://host.docker.internal:8000
+    depends_on:
+      - dynamo
+
 networks:
   local-dynamodb:
     name: local-dynamodb
