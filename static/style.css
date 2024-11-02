@@ -72,3 +72,21 @@ button {
     color: red;
     display: none; /* Hidden by default, shown by JavaScript */
 }
+
+/* Styling for the dropdown */
+.dropdown {
+    padding: 5px; /* Consistent padding */
+    font-size: 16px; /* Font size */
+    border: 1px solid #ccc; /* Border for the dropdown */
+    border-radius: 4px; /* Rounded corners */
+}
+
+/* Style for the form container */
+#addMonsterForm {
+    width: 300px; /* Adjust width as needed */
+    margin: 20px auto; /* Center the form */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
