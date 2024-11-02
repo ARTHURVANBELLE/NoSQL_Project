@@ -25,24 +25,27 @@
             <input type="number" id="money" name="money" value="{{ user.money }}" required>
         </div>
         <div>
-            <label for="inventory_id">Inventory ID:</label>
-            <input type="number" id="inventory_id" name="inventory_id" value="{{ user.inventory_id }}" required>
-        </div>
-        <div>
             <label for="xp">XP:</label>
             <input type="number" id="xp" name="xp" value="{{ user.xp }}" required>
         </div>
         <div>
             <label for="elo">ELO Rating:</label>
             <input type="number" id="elo" name="elo" value="{{ user.elo }}" required>
-        </div>
+        </div
         <label for="user_class">User Class:</label>
             <select id="user_class" name="user_class" required>
                 {% for uclass in user_classes %}
                     <option value="{{ uclass['user_class'] }}" {% if uclass['user_class'] == user.user_class %}selected{% endif %}>{{ uclass['user_class'] }}</option>
                 {% endfor %}
             </select>
-        <button type="submit">Update User</button>
+            <div>
+                <a href="{{ url_for('v1/inventory_inventory', inventory_id=user.user_id) }}">
+                <button type="button">Inventory</button>
+                </a>
+            </div>
+        <div>
+            <button type="submit">Update User</button>
+        </div>
     </form>
 
     <script>
@@ -62,7 +65,6 @@
                     name: formData.get('name'),
                     clan_id: formData.get('clan_id'),
                     money: formData.get('money'),
-                    inventory_id: formData.get('inventory_id'),
                     xp: formData.get('xp'),
                     elo: formData.get('elo'),
                     user_class: formData.get('user_class') // Updated to fetch from select

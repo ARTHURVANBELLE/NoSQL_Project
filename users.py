@@ -13,6 +13,7 @@ users_namespace = Namespace('v1/users', description='User operations')
 
 users_table = dynamoConnect.dynamodb_resource.Table("users")
 clans_table = dynamoConnect.dynamodb_resource.Table("clans")
+inventory_table = dynamoConnect.dynamodb_resource.Table("inventories")
 
 user_classes = dynamoConnect.dynamodb_resource.Table("user_classes")
 
@@ -88,6 +89,10 @@ class Clans(Resource):
     def post(self):
         """Create a new user"""
         data = request.json
+        inventory_data = {
+            'inventory_id': '',
+            'item_id_list': ''
+        }
 
         try:
             # Check if clan_id is provided and valid
@@ -103,6 +108,8 @@ class Clans(Resource):
             # Generate a unique user_id
             new_user_id = str(uuid.uuid4())
             data['user_id'] = new_user_id
+            data['inventory_id'] = new_user_id
+            inventory_data['inventory_id'] = new_user_id
 
             # Update clan's user_id_list if a valid clan_id is provided
             if clan_id:
@@ -123,6 +130,7 @@ class Clans(Resource):
 
             # Insert the new user into DynamoDB
             users_table.put_item(Item=data)
+            inventory_table.put_item(Item=inventory_data)
             return {'message': 'User created successfully', 'user_id': data['user_id']}, 201
 
         except ClientError as e:

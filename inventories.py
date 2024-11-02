@@ -30,7 +30,7 @@ class Inventory(Resource):
             inventory = response.get('Item')
             inventory_data = {
                 "invntory_id": inventory_id,
-                "item_id_list": inventory.get('item_id_list', "Unknown"),
+                #"item_id_list": inventory.get('item_id_list', "Unknown"),
             }
             if not inventory_data:
                 return {'message': 'Inventory not found'}, 404
