@@ -4,35 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .input-row input {
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -41,94 +13,40 @@
 <table>
     <thead>
         <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Quantity</th>
-            <th>Category</th>
-            <th>Description</th>
+            <th>Rarity</th>
+            <th>Properties</th>
             <th>Actions</th>
         </tr>
     </thead>
-    <tbody id="inventoryTableBody">
+    <tbody>
+        {% for item in inventory_items %}
         <tr>
-            <td contenteditable="true">Potion</td>
-            <td contenteditable="true">10</td>
-            <td contenteditable="true">Consumable</td>
-            <td contenteditable="true">Heals 50 HP</td>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.rarity }}</td>
+            <td>{{ item.properties }}</td>
             <td>
-                <button onclick="saveChanges(this)">Save</button>
-                <button onclick="deleteItem(this)">Delete</button>
+                <!-- Actions like Save and Delete (non-functional in this case) -->
+                <button>Save</button>
+                <button>Delete</button>
             </td>
         </tr>
-        <tr>
-            <td contenteditable="true">Sword</td>
-            <td contenteditable="true">1</td>
-            <td contenteditable="true">Weapon</td>
-            <td contenteditable="true">A basic weapon</td>
-            <td>
-                <button onclick="saveChanges(this)">Save</button>
-                <button onclick="deleteItem(this)">Delete</button>
-            </td>
-        </tr>
-        <!-- Input row for adding a new item -->
+        {% endfor %}
+        <!-- Input row for adding a new item (non-functional without JavaScript) -->
         <tr class="input-row">
+            <td><input type="text" id="newId" placeholder="Enter ID"></td>
             <td><input type="text" id="newItemName" placeholder="Enter item name"></td>
             <td><input type="number" id="newItemQuantity" placeholder="Enter quantity"></td>
             <td><input type="text" id="newItemCategory" placeholder="Enter category"></td>
             <td><input type="text" id="newItemDescription" placeholder="Enter description"></td>
-            <td><button onclick="addItem()">Add Item</button></td>
+            <td><button>Add Item</button></td>
         </tr>
     </tbody>
 </table>
-
-<script>
-    function addItem() {
-        // Get values from input fields
-        const name = document.getElementById('newItemName').value;
-        const quantity = document.getElementById('newItemQuantity').value;
-        const category = document.getElementById('newItemCategory').value;
-        const description = document.getElementById('newItemDescription').value;
-
-        // Validate input
-        if (name && quantity && category && description) {
-            // Create a new row with editable cells
-            const tableBody = document.getElementById('inventoryTableBody');
-            const newRow = document.createElement('tr');
-
-            newRow.innerHTML = `
-                <td contenteditable="true">${name}</td>
-                <td contenteditable="true">${quantity}</td>
-                <td contenteditable="true">${category}</td>
-                <td contenteditable="true">${description}</td>
-                <td>
-                    <button onclick="saveChanges(this)">Save</button>
-                    <button onclick="deleteItem(this)">Delete</button>
-                </td>
-            `;
-
-            // Append new row to the table
-            tableBody.appendChild(newRow);
-
-            // Clear input fields
-            document.getElementById('newItemName').value = '';
-            document.getElementById('newItemQuantity').value = '';
-            document.getElementById('newItemCategory').value = '';
-            document.getElementById('newItemDescription').value = '';
-        } else {
-            alert('Please fill in all fields.');
-        }
-    }
-
-    function deleteItem(button) {
-        // Find the row to delete
-        const row = button.parentElement.parentElement;
-        row.parentElement.removeChild(row);
-    }
-
-    function saveChanges(button) {
-        // Notify user of saved changes
-        alert('Changes saved for this item.');
-    }
-</script>
 
 </body>
 </html>

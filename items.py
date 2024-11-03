@@ -51,7 +51,7 @@ def create_item(item_name, item_id, item_rarity, item_properties):
         item = {
             'item_name': item_name,
             'item_id': item_id,
-            'item_rarity': item_rarity, 
+            'item_rarity': item_rarity,
             'item_properties': item_properties
         }
         items_table.put_item(Item=item)
