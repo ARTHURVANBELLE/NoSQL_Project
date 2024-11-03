@@ -13,7 +13,7 @@
         <h1>Monster List</h1>
 
         <div>
-            <input type="text" id="search" placeholder="Search by Name">
+            <input type="text" id="search" placeholder="Search by Name or Type">
             <button onclick="searchMonsters()">Search</button>
             <button onclick="openAddMonsterForm()">Add new Monster</button>
         </div>
@@ -21,6 +21,16 @@
         <!-- New MonsterForm-->
         <div id="addMonsterForm" style="display:none;">
             <h3>Create a new Monster</h3>
+
+            <div>
+                <label for="myDropdown">Type of monster</label>
+                <select id="myDropdown" class="dropdown">
+                    <option value="Goblin">Goblin</option>
+                    <option value="Zombie">Zombie</option>
+                    <option value="Dragon">Dragon</option>
+                    <option value="Orc">Orc</option>
+                </select>
+            </div>
             <div class="form-field">
                 <input type="text" id="newName" placeholder="Name" required>
             </div>
@@ -43,8 +53,8 @@
         <table id="monsterTable">
             <thead>
                 <tr>
-                    <th>Monster ID</th>
-                    <th>Name</th>
+                    <th>Monster Type</th>
+                    <th>Monster Name</th>
                 </tr>
             </thead>
             <tbody id="monsterTableBody"></tbody>
@@ -59,11 +69,11 @@
     <script>
         let currentPage = 1;
         const limit = 20;
-        let totalClans = 0;
         let totalPages = 0;
 
         // Function to fetch monsters
         function fetchMonsters(page = 1, search = '') {
+            console.log("Start Fetching")
             fetch(`/monsters_api/?page=${page}&limit=${limit}&search=${search}`)
                 .then(response => response.json())
                 .then(data => {
@@ -73,9 +83,10 @@
                     updatePagination(page, totalPages);
                 })
                 .catch(error => console.error('Error fetching monsters:', error));
+            console.log("Done Fetching")
         }
 
-        // Function to populate the user table
+        // Function to populate the monster table
         function populateMonsterTable(monsters) {
             const tableBody = document.getElementById('monsterTableBody');
             tableBody.innerHTML = '';  // Clear existing rows
@@ -83,10 +94,10 @@
             monsters.forEach(monster => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${monster.monster_id}</td>
-                    <td>${monster.name}</td>
+                    <td>${monster.monster_type}</td>
+                    <td>${monster.monster_name}</td>
                     <td>
-                        <button onclick="viewMonster('${monster.monster.id}')">View</button>
+                        <button onclick="viewMonster('${monster.monster_name}', '${monster.monster_type}')">View</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -112,9 +123,10 @@
             fetchMonsters(1, searchValue);  // Reset to page 1 when searching
         }
 
-        // Function to view user details
-        function viewMonster(monsterId) {
-            window.location.href = `/monsters_api/${monsterId}`; // Redirect to monster detail page
+        // Function to view monster
+        function viewMonster(monster_name, monster_type) {
+            console.log("Going to the page")
+            window.location.href = `/monsters_api/${monster_type}/${monster_name}`; // Redirect to monster detail page
         }
 
         function openAddMonsterForm() {
@@ -128,7 +140,8 @@
         function addMonster() {
 
             const newMonster = {
-                name: document.getElementById('newName').value,
+                monster_name: document.getElementById('newName').value,
+                monster_type: document.getElementById('myDropdown').value,
                 inventory_id: parseInt(document.getElementById('newInventoryId').value),
                 reward_money: parseInt(document.getElementById('rewardMoney').value),
                 reward_xp: parseInt(document.getElementById('rewardXP').value),
@@ -147,7 +160,7 @@
                     if (data.message === 'Monster created successfully') {
                         alert('Monster created successfully');
                         closeAddMonsterForm();
-                        window.location.href = `/monsters_api/${data.monster_id}`;
+                        window.location.href = `/monsters_api/monsters`;
                     } else {
                         alert('Failed to create monster: ' + data.message);
                     }
