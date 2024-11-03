@@ -10,6 +10,40 @@
 
 <h1>Inventory Management</h1>
 
+<!-- Search Form -->
+<form method="POST" action="{{ url_for('v1/inventory_search') }}">
+    <input type="text" name="search_query" placeholder="Search for items..." required>
+    <button type="submit">Search</button>
+</form>
+
+<!-- Search Results -->
+{% if search_results %}
+    <h2>Search Results</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Rarity</th>
+                <th>Properties</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in search_results %}
+            <tr>
+                <td>{{ item.item_id }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.item_rarity }}</td>
+                <td>{{ item.item_proporties }}</td>
+                <td><button onclick="addToInventory({{ item.item_name }})">Add to Inventory</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<!-- Inventory Table -->
 <table>
     <thead>
         <tr>
@@ -24,11 +58,11 @@
     <tbody>
         {% for item in inventory_items %}
         <tr>
-            <td>{{ item.id }}</td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.rarity }}</td>
-            <td>{{ item.properties }}</td>
+            <td>{{ item.item_id }}</td>
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.item_quantity }}</td>
+            <td>{{ item.item_rarity }}</td>
+            <td>{{ item.item_properties }}</td>
             <td>
                 <!-- Actions like Save and Delete (non-functional in this case) -->
                 <button>Save</button>
@@ -38,11 +72,11 @@
         {% endfor %}
         <!-- Input row for adding a new item (non-functional without JavaScript) -->
         <tr class="input-row">
-            <td><input type="text" id="newId" placeholder="Enter ID"></td>
-            <td><input type="text" id="newItemName" placeholder="Enter item name"></td>
+            <td><text type="text" id="newId" placeholder="Enter ID"></td>
+            <td><text type="text" id="newItemName" placeholder="Enter item name"></td>
             <td><input type="number" id="newItemQuantity" placeholder="Enter quantity"></td>
-            <td><input type="text" id="newItemCategory" placeholder="Enter category"></td>
-            <td><input type="text" id="newItemDescription" placeholder="Enter description"></td>
+            <td><text type="text" id="newItemCategory" placeholder="Enter category"></td>
+            <td><text type="text" id="newItemDescription" placeholder="Enter description"></td>
             <td><button>Add Item</button></td>
         </tr>
     </tbody>

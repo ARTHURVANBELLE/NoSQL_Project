@@ -22,6 +22,8 @@ api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(inventory_namespace, path='/inventory_api')
 
+
+
 # with app.app_context():
 #     print("Registered routes:")
 #     for rule in app.url_map.iter_rules():
