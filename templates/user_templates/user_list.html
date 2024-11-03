@@ -31,9 +31,6 @@
                 <input type="number" id="newMoney" placeholder="Money" required>
             </div>
             <div class="form-field">
-                <input type="number" id="newInventoryId" placeholder="Inventory ID" required>
-            </div>
-            <div class="form-field">
                 <input type="number" id="newXp" placeholder="XP" required>
             </div>
             <div class="form-field">
@@ -186,7 +183,7 @@
                     name: document.getElementById('newName').value,
                     clan_id: clanId || null,
                     money: parseInt(document.getElementById('newMoney').value),
-                    inventory_id: parseInt(document.getElementById('newInventoryId').value),
+                    //inventory_id: parseInt(document.getElementById('newInventoryId').value),
                     xp: parseInt(document.getElementById('newXp').value),
                     elo: parseInt(document.getElementById('newElo').value),
                     user_class: document.getElementById('newUserClass').value
