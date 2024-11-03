@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Monster</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Edit Monster</h1>
+    <form id="editMonsterForm" onsubmit="submitForm(event)">
+        <input type="hidden" name="monster_name" value="{{ monster.monster_name }}">
+    
+        <div>
+            <label for="monster_name">Name:</label>
+            <input type="string" id="monster_name" name="monster_name" value="{{ monster.monster_name }}" required readonly>
+        </div>
+
+        <div>
+            <label for="monster_type">Monster Type:</label>
+            <input type="string" id="monster_type" name="monster_type" value="{{ monster.monster_type }}" required readonly>
+        </div>
+
+        <div>
+            <label for="reward_money">Reward Money:</label>
+            <input type="number" id="reward_money" name="reward_money" value="{{ monster.reward_money }}" required>
+        </div>
+
+        <div>
+            <label for="inventory_id">Inventory ID:</label>
+            <input type="number" id="inventory_id" name="inventory_id" value="{{ monster.inventory_id }}" required>
+        </div>
+
+        <div>
+            <label for="reward_xp">Reward XP:</label>
+            <input type="number" id="reward_xp" name="reward_xp" value="{{ monster.reward_xp }}" required>
+        </div>
+
+        <div>
+            <label for="level">Level:</label>
+            <input type="text" id="level" name="level" value="{{ monster.level }}" required>
+        </div>
+
+        <button type="submit">Update Monster</button>
+    </form>
+
+    <script>
+        function submitForm(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const form = document.getElementById('editMonsterForm');
+            const formData = new FormData(form);
+            const monsterName = formData.get('monster_name');
+            const monsterType = formData.get('monster_type');
+
+            fetch(`/monsters_api/${monsterType}/${monsterName}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    monster_name: formData.get('monster_name'),
+                    monster_type: formData.get('monster_type'),
+                    reward_money: formData.get('reward_money'),
+                    inventory_id: formData.get('inventory_id'),
+                    reward_xp: formData.get('reward_xp'),
+                    level: formData.get('level')
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Monster updated successfully');
+                    window.location.href = `/monsters_api/${monsterType}/${monsterName}`; // Redirect to monster detail page
+                } else {
+                    alert('Failed to update monster');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
