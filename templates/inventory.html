@@ -8,10 +8,10 @@
 </head>
 <body>
 
-<h1>Inventory Management</h1>
+<h1>Inventory Management : "{{inventory_id}}"</h1>
 
 <!-- Search Form -->
-<form method="POST" action="{{ url_for('v1/inventory_search') }}">
+<form method="POST" action="{{ url_for('v1/inventory_search', inventory_id=inventory_id) }}">
     <input type="text" name="search_query" placeholder="Search for items..." required>
     <button type="submit">Search</button>
 </form>
@@ -36,7 +36,13 @@
                 <td>{{ item.item_name }}</td>
                 <td>{{ item.item_rarity }}</td>
                 <td>{{ item.item_proporties }}</td>
-                <td><button onclick="addToInventory({{ item.item_name }})">Add to Inventory</button></td>
+                <td>
+                    <form method="POST" action="{{ url_for('v1/inventory_add_item', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id) }}">
+                        <button type="submit">Add to Inventory</button>
+                    </form>
+                </td>
+                
+                
             </tr>
             {% endfor %}
         </tbody>
@@ -52,7 +58,7 @@
             <th>Quantity</th>
             <th>Rarity</th>
             <th>Properties</th>
-            <th>Actions</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -60,7 +66,7 @@
         <tr>
             <td>{{ item.item_id }}</td>
             <td>{{ item.item_name }}</td>
-            <td>{{ item.item_quantity }}</td>
+            <td><input type="number" id="newItemQuantity" placeholder={{ item.item_quantity }}></td>
             <td>{{ item.item_rarity }}</td>
             <td>{{ item.item_properties }}</td>
             <td>
@@ -70,15 +76,6 @@
             </td>
         </tr>
         {% endfor %}
-        <!-- Input row for adding a new item (non-functional without JavaScript) -->
-        <tr class="input-row">
-            <td><text type="text" id="newId" placeholder="Enter ID"></td>
-            <td><text type="text" id="newItemName" placeholder="Enter item name"></td>
-            <td><input type="number" id="newItemQuantity" placeholder="Enter quantity"></td>
-            <td><text type="text" id="newItemCategory" placeholder="Enter category"></td>
-            <td><text type="text" id="newItemDescription" placeholder="Enter description"></td>
-            <td><button>Add Item</button></td>
-        </tr>
     </tbody>
 </table>
 

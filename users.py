@@ -91,7 +91,7 @@ class Clans(Resource):
         data = request.json
         inventory_data = {
             'inventory_id': '',
-            'item_id_list': ''
+            'item_id_dict': ''
         }
 
         try:
@@ -197,6 +197,7 @@ class User(Resource):
                 )
 
             users_table.delete_item(Key={'user_id': user_id})
+            inventory_table.delete_item(Key={'inventory_id': user_id})
             
             return {'message': 'User deleted successfully'}, 200
         except ClientError as e:

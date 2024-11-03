@@ -17,83 +17,71 @@ item_table = dynamoConnect.dynamodb_resource.Table("items")
 
 # Define the user model for the Swagger UI
 inventory_model = inventory_namespace.model('Inventory', {
-    'inventory_id': fields.String(required=True, description='Unique user identifier'),
-    'item_id_list': fields.String(required=True, description='User name')
+    'inventory_id': fields.String(required=True, description='Inventory ID'),
+    'item_id_dict': fields.String(required=True, description='Item ID Dictionary')
 })
-
-inventory_items = [
-    {
-        'id': 1,
-        'name': 'Potion',
-        'quantity': 10,
-        'rarity': 'Consumable',
-        'properties': 'Heals 50 HP'
-    },
-    {
-        'id': 2,
-        'name': 'Sword',
-        'quantity': 1,
-        'rarity': 'Weapon',
-        'properties': 'A sharp blade for battle'
-    }
-    # Add more items as needed
-]
-
-# Sample items table data - replace with your database
-items_table = [
-    {'id': 1, 'name': 'Potion', 'category': 'Consumable', 'description': 'Heals 50 HP'},
-    {'id': 2, 'name': 'Sword', 'category': 'Weapon', 'description': 'A sharp blade for battle'},
-    {'id': 3, 'name': 'Shield', 'category': 'Armor', 'description': 'Protects from attacks'}
-]
 
 @inventory_namespace.route('/<string:inventory_id>')
 @inventory_namespace.param('inventory_id', 'The inventory identifier')
-
 class Inventory(Resource):
     @inventory_namespace.doc('get_inventory')
     def get(self, inventory_id):
         """Fetch an inventory by ID"""
         try:
-            response = inventory_table.get_item(Key={'inventory_id': inventory_id})
-            inventory = response.get('Item')
-            
-            if not inventory:
-                item_id_list = []
-            else:
-                item_id_list = inventory.get('item_id_list', [])
+            item_id_list = get_inventory_data(inventory_id)
                 
-            inventory_data = {
-                "invntory_id": inventory_id,
-                "item_id_list": item_id_list,
-            }
+            inventory_data = get_items_data(item_id_list)
+
             if not inventory_data:
                 return {'message': 'Inventory not found'}, 404
             
-            html_content = render_template('inventory.html', inventory_items=inventory_data)
+            html_content = render_template('inventory.html', inventory_id =inventory_id, inventory_items=inventory_data)
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response
         
         except ClientError as e:
-            #return {'message': str(e)}, 500
             html_content = render_template('inventory.html')
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
             return response
+    
+@inventory_namespace.route('/add_item/<string:item_name>/<string:inventory_id>/<string:item_id>')
+@inventory_namespace.doc('add_item')
+class AddItem(Resource):
+    def post(self, item_name, item_id, inventory_id):
+        """Add an item to the inventory"""
+        try:
+            # Update the inventory table to add the item name to the item_id_list
+            fill_inventory(inventory_id,item_id , item_name)
+            item_id_list = get_inventory_data(inventory_id)
+            inventory_data = get_items_data(item_id_list)
+            
+            html_content = render_template('inventory.html', inventory_id =inventory_id, inventory_items=inventory_data)
+            response = make_response(html_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
+            
+        except ClientError as e:
+            return {'message': str(e)}, 500
+
 
 #Separate route for the search functionality
-@inventory_namespace.route('/search')
+@inventory_namespace.route('/search/<string:inventory_id>')
 class Search(Resource):
-    def post(self):
+    def post(self, inventory_id):
         search_query = request.form.get('search_query')
         search_results = []
         
         if search_query:
             # Fetch the search results from DynamoDB
             search_results = search_items_in_dynamodb(search_query.lower())
+        
+        item_id_list = get_inventory_data(inventory_id)
+        inventory_data = get_items_data(item_id_list)
 
 
-        html_content = render_template('inventory.html', inventory_items=[], search_results=search_results)
+        html_content = render_template('inventory.html',inventory_id = inventory_id, inventory_items=inventory_data, search_results=search_results)
         response = make_response(html_content)
         response.headers['Content-Type'] = 'text/html'
         return response
@@ -110,3 +98,53 @@ def search_items_in_dynamodb(search_query):
     ]
 
     return search_results
+
+def fill_inventory(inventory_id, new_item_id, new_item_name):
+    # Fetch the inventory data from DynamoDB
+    response = inventory_table.get_item(Key={'inventory_id': inventory_id})
+    inventory = response.get('Item')
+    
+    if not inventory:
+        item_id_dict = {}
+    else:
+        item_id_dict = inventory.get('item_id_dict', {})
+    
+    # Add the new item to the inventory
+    item_id_dict[str(new_item_id + "," + new_item_name)] = 1
+    
+    # Update the inventory table with the new item
+    inventory_table.update_item(
+        Key={'inventory_id': inventory_id},
+        UpdateExpression='SET item_id_dict = :item_id_dict',
+        ExpressionAttributeValues={':item_id_dict': item_id_dict}
+    )
+    
+def get_inventory_data(inventory_id):
+    response = inventory_table.get_item(Key={'inventory_id': inventory_id})
+
+    inventory = response.get('Item')
+
+    if not inventory:
+        item_id_dict = {}
+    else:
+        item_id_dict = inventory.get('item_id_dict', {})
+
+    return item_id_dict
+
+def get_items_data(item_id_dict):
+    items_data = []
+    
+    for item_data in item_id_dict.keys():
+        item_name = item_data.split(",")[1]
+        item_id = item_data.split(",")[0]
+        response = item_table.get_item(Key={'item_id': item_id, 'item_name': item_name})
+        item = response.get('Item')
+        
+        
+        if item:
+            item['item_quantity'] = item_id_dict[item_data]
+            print("quantity -----------------")
+            print(item['item_quantity'])
+            items_data.append(item)
+    
+    return items_data
