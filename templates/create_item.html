@@ -27,6 +27,10 @@
                         <td class="px-4 py-2 border-b">{{ item['item_id'] }}</td>
                         <td class="px-4 py-2 border-b">{{ item['item_rarity'] }}</td>
                         <td class="px-4 py-2 border-b">{{ item['item_properties'] }}</td>
+                        <td class="px-4 py-2 border-b">
+                            <button onclick="editItem('{{ item['item_id'] }}', '{{ item['item_name'] }}')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Edit</button>
+                            <button onclick="deleteItem('{{ item['item_id'] }}', '{{ item['item_name'] }}')" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -40,9 +44,22 @@
                         <input type="text" id="newItemName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item name">
                     </div>
                     <div class="mb-2">
-                        <label for="newItemId" class="block font-medium mb-1">ID (eg:connsumable001)</label>
-                        <input type="text" id="newItemId" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item ID">
+                        <label for="newItemId" class="block font-medium mb-1">ID</label>
+                        <select id="newItemId" name="item_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="toggleCustomIdField()">
+                            <option value="Consummable">Consummable</option>
+                            <option value="Quest">Quest</option>
+                            <option value="Collectible">Collectible</option>
+                            <option value="Event">Event</option>
+                            <option value="Other">Other...</option> <!-- If we want to input something ourself -->
+                        </select>
                     </div>
+                    
+                    <!-- I'ts hidden and will show when we press Other-->
+                    <div class="mb-2" id="customIdField" style="display: none;">
+                        <label for="customItemId" class="block font-medium mb-1">Custom ID</label>
+                        <input type="text" id="customItemId" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter custom ID">
+                    </div>
+                    
                     <div class="mb-2">
                         <label for="newItemRarity" class="block font-medium mb-1">Rarity</label>
                         <input type="text" id="newItemRarity" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter item rarity">
@@ -50,9 +67,12 @@
                     <div class="mb-2">
                         <label class="block font-medium mb-1">Properties</label>
                         <div id="propertyFields">
-                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" placeholder="Enter item property">
+
                         </div>
-                        <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2" onclick="addPropertyField()">Add Another Property</button>
+                        <div class="flex gap-2">
+                            <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2" onclick="addPropertyField()">Add Property</button>
+                            <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2" onclick="removeLastProperty()">Remove Property</button>
+                        </div>
                     </div>
                     <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addItem()">Add Item</button>
 
@@ -63,16 +83,68 @@
     </div>
 
     <script>
+
+
+function toggleCustomIdField() {
+    const selectElement = document.getElementById('newItemId');
+    const customIdField = document.getElementById('customIdField');
+    
+    if (selectElement.value === 'Other') {
+        customIdField.style.display = 'block';
+    } else {
+        customIdField.style.display = 'none';
+    }
+}
+
+function createPropertyField(value = '') {
+    const fieldContainer = document.createElement('div');
+    fieldContainer.className = 'flex gap-2 mb-2 property-container';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = value;
+    input.className = 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline';
+    input.placeholder = 'Enter item property';
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded';
+    removeButton.textContent = 'X';
+    removeButton.onclick = () => fieldContainer.remove();
+
+    fieldContainer.appendChild(input);
+    fieldContainer.appendChild(removeButton);
+    
+    return fieldContainer;
+}
+
+function addPropertyField() {
+    const propertyFields = document.getElementById('propertyFields');
+    propertyFields.appendChild(createPropertyField());
+}
+
+function removeLastProperty() {
+    const propertyFields = document.getElementById('propertyFields');
+    const properties = propertyFields.getElementsByClassName('property-container');
+    if (properties.length > 0) {
+        properties[properties.length - 1].remove();
+    }
+}
+
 function addItem() {
     const name = document.getElementById('newItemName').value;
-    const id = document.getElementById('newItemId').value;
+    const idSelect = document.getElementById('newItemId').value;
+    const customId = document.getElementById('customItemId').value;
     const rarity = document.getElementById('newItemRarity').value;
 
-    // Get all property inputs
-    const propertyInputs = document.querySelectorAll('#propertyFields input');
-    const properties = Array.from(propertyInputs).map(input => input.value).filter(value => value);
+    const id = (idSelect === 'Other') ? customId : idSelect;
 
-    if (name && id && rarity && properties) {
+    const propertyInputs = document.querySelectorAll('#propertyFields input');
+    const properties = Array.from(propertyInputs)
+        .map(input => input.value)
+        .filter(value => value.trim() !== '');
+
+    if (name && id && rarity && properties.length > 0) {
         fetch('/items_api/', {
             method: 'POST',
             headers: {
@@ -86,26 +158,103 @@ function addItem() {
             })
         })
         .then(response => response.json())
-        .then(data => {
-            // Reload the page to show the new item
-            location.reload();
-        })
-        .catch(error => {
-            alert(`Error: ${error}`);
-        });
+        .then(() => location.reload())
+        .catch(error => alert(`Error: ${error}`));
     } else {
-        alert('Please fill in all fields.');
+        alert('Please fill in all fields and add at least one property.');
     }
 }
 
-function addPropertyField() {
-    const propertyFields = document.getElementById('propertyFields');
-    const newField = document.createElement('input');
-    newField.type = 'text';
-    newField.placeholder = 'Enter item property';
-    newField.className = 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2';
-    propertyFields.appendChild(newField);
+function editItem(itemId, itemName) {
+    // First, fetch the current item data
+    fetch(`/items_api/${itemId}/${itemName}`)
+        .then(response => response.json())
+        .then(item => {
+            // Put the item data into the form
+            document.getElementById('newItemName').value = item.item_name;
+            
+            // Set the item type select to the correct value
+            const itemTypeSelect = document.getElementById('newItemId');
+            if(['Consummable', 'Quest', 'Collectible', 'Event'].includes(item.item_id)) {
+                itemTypeSelect.value = item.item_id;
+                document.getElementById('customIdField').style.display = 'none';
+            } else {
+                itemTypeSelect.value = 'Other';
+                document.getElementById('customIdField').style.display = 'block';
+                document.getElementById('customItemId').value = item.item_id;
+            }
+            
+            document.getElementById('newItemRarity').value = item.item_rarity;
+
+            // Clear the property fields and add the item's properties
+            const propertyFields = document.getElementById('propertyFields');
+            propertyFields.innerHTML = '';
+            item.item_properties.forEach(property => {
+                propertyFields.appendChild(createPropertyField(property));
+            });
+
+            // Change the submit button to update the item
+            const submitButton = document.querySelector('#itemForm button[type="button"]');
+            submitButton.textContent = 'Update Item';
+            submitButton.onclick = () => updateItem(itemId, itemName);
+        })
+        .catch(error => alert(`Error fetching item: ${error}`));
 }
+
+function updateItem(originalItemId, originalItemName) {
+    const name = document.getElementById('newItemName').value;
+    const idSelect = document.getElementById('newItemId').value;
+    const customId = document.getElementById('customItemId').value;
+    const rarity = document.getElementById('newItemRarity').value;
+    
+    const newId = (idSelect === 'Other') ? customId : idSelect;
+    
+    const propertyInputs = document.querySelectorAll('#propertyFields input');
+    const properties = Array.from(propertyInputs)
+        .map(input => input.value)
+        .filter(value => value.trim() !== '');
+
+    if (name && newId && rarity && properties.length > 0) {
+        fetch(`/items_api/${originalItemId}/${originalItemName}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                item_name: name,
+                new_item_id: newId,
+                item_rarity: rarity,
+                item_properties: properties
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update item');
+            }
+            return response.json();
+        })
+        .then(() => location.reload())
+        .catch(error => alert(`Error updating item: ${error}`));
+    } else {
+        alert('Please fill in all fields and include at least one property.');
+    }
+}
+
+function deleteItem(itemId, itemName) {
+    if (confirm('Are you sure you want to delete this item?')) {
+        fetch(`/items_api/${itemId}/${itemName}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete item');
+            }
+            location.reload();
+        })
+        .catch(error => alert(`Error: ${error}`));
+    }
+}
+
 
     </script>
 </body>

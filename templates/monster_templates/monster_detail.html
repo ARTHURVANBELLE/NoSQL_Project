@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Detail</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Monster Information Section -->
+    <div class="monster-info">
+        <h1>Monster</h1>
+
+        <div class="info-item">
+            <strong>Name:</strong> <span id="monster_name">{{ monster.monster_name }}</span>
+        </div>
+
+
+        <div class="info-item">
+            <strong>Type:</strong> <span id="monster_type">{{ monster.monster_type }}</span>
+        </div>
+
+        <div class="info-item">
+            <strong>Inventory ID:</strong> <span id="inventory_id">{{ monster.inventory_id }}</span>
+        </div>
+
+        <div class="info-item">
+            <strong>Reward XP:</strong> <span id="reward_xp">{{ monster.reward_xp }}</span>
+        </div>
+
+        <div class="info-item">
+            <strong>Reward money:</strong> <span id="reward_money">{{ monster.reward_money }}</span>
+        </div>
+
+        <div class="info-item">
+            <strong>Level:</strong> <span id="level">{{ monster.level }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+
+            <!-- Modify Button -->
+            <button onclick="modifyMonster('{{ monster.monster_type }}', '{{ monster.monster_name }}')">Modify</button>
+
+            <!-- Delete Button -->
+            <button onclick="deleteMonster('{{ monster.monster_name }}', '{{ monster.monster_type }}')">Delete</button>
+
+            <button onclick="monsterPage()">Go to monster page</button>
+        </div>
+
+        <script>
+            function modifyMonster(monsterType,monsterName) {
+                window.location.href = `/monsters_api/${monsterType}/${monsterName}/edit`;  // Redirect to an edit page
+            }
+
+            function deleteMonster(monsterName, monsterType) {
+                const deleteUrl = `/monsters_api/${monsterType}/${monsterName}`;  // Construct the URL with userId
+                console.log("Delete URL:", deleteUrl);
+                if (confirm('Are you sure you want to delete this monster?')) {
+                    fetch(`/monsters_api/${monsterType}/${monsterName}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                console.log(monsterType)
+                                console.log(monsterName)
+                                alert('Monster deleted successfully');
+                                window.location.href = '/monsters_api/monsters'; // Redirect after deletion
+                            } else {
+                                alert('Failed to delete monster');
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+            }
+            
+            function monsterPage(){
+                window.location.href = `/monsters_api/monsters`;
+            }
+        </script>
+</body>

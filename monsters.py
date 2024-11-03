@@ -15,8 +15,8 @@ monsters_table = dynamoConnect.dynamodb_resource.Table("monsters")
 
 # Define the monster model for the Swagger UI
 monster_model = monsters_namespace.model('Monster', {
-    'monster_id': fields.String(required=True, description='Unique Monster identifier'),
-    'name': fields.String(required=True, description='Monster name'),
+    'monster_type': fields.String(required=True, description='Monster type'),
+    'monster_name': fields.String(required=True, description='Monster name'),
     'inventory_id': fields.Integer(required=True, description='Inventory ID'),
     'reward_money': fields.Integer(required=True, description='Monster reward money'),
     'reward_xp': fields.Integer(required=True, description='Monster reward experience points'),
@@ -68,7 +68,7 @@ class Monsters(Resource):
 
             # Filter a monster if a search term is provided
             if search:
-                monsters = [monster for monster in monsters if search.lower() in monster['name'].lower() or search.lower() in monster['monster_id'].lower()]
+                monsters = [monster for monster in monsters if search.lower() in monster['monster_name'].lower() or search.lower() in monster['monster_type'].lower()]
             total_monsters = len(monsters)
 
             #Apply pagination
@@ -88,61 +88,173 @@ class Monsters(Resource):
     def post(self):
         """Create a new monster"""
         data = request.json
-        # Generate a unique monster_id
-        data['monster_id'] = str(uuid.uuid4())  # Change this line to use UUID
+        print(data)
+
         try:
+            
+           # Check if all required fields for the table schema are present
+            required_keys = ["monster_type", "monster_name"]
+            for key in required_keys:
+                if key not in data:
+                    raise ValueError(f"Missing required field: {key}")            
+
+
+            # Convert fields to required types (DynamoDB type restrictions)
+            data['inventory_id'] = int(data['inventory_id'])
+            data['reward_money'] = int(data['reward_money'])
+            data['reward_xp'] = int(data['reward_xp'])
+            data['level'] = int(data['level'])
+
+            
+
+            # Debugging: Print the final data before insertion
+            print("Final data to insert:", data)
             # Insert a new monster into DynamoDB
             monsters_table.put_item(Item=data)
+            print("done")
+
+
+
+
             return {'message': 'Monster created successfully'}, 201
         except ClientError as e:
+            print("DynamoDB ClientError:", str(e))
             return {'message': str(e)}, 500
+        except ValueError as ve:
+            print("Validation Error:", str(ve))
+            return {'message': str(ve)}, 400        
 
 
-@monsters_namespace.route('/<string:monster_id>')
-@monsters_namespace.param('monster_id', 'The monster identifier')
+@monsters_namespace.route('/<string:monster_type>/<string:monster_name>')
+@monsters_namespace.param('monster_type', 'The monster type')
+@monsters_namespace.param('monster_name', 'The monster name')
+
 class Monster(Resource):
     @monsters_namespace.doc('get_monster')
-    def get(self, monster_id):
-        """Fetch a monster by monster_id"""
+    def get(self, monster_name, monster_type):
+        """Fetch a monster by monster_name and monster_type"""
         try:
-            response = monsters_table.get_item(Key={'monster_id': monster_id})
-            monster = response.get('Item')
-            if not monster:
+            print(f"Fetching monster with type: {monster_type}, name: {monster_name}")
+            response = monsters_table.get_item(Key={'monster_name': monster_name, 'monster_type':monster_type})
+            print(response)
+            if 'Item' not in response:
                 return {'message': 'Monster not found'}, 404
-            return convert_decimals(monster), 200
+            print(monster_name)
+            print(monster_type)
+            monster = response.get('Item')
+            monster_data = {
+                "monster_name": monster_name,
+                "monster_type": monster_type,
+                "reward_money": monster.get('reward_money'),
+                "reward_xp": monster.get('reward_xp'),
+                
+                "level": monster.get('level'),
+                "inventory_id": monster.get('inventory_id')
+            }
+            if not monster_data:
+                return {'message': 'Monster not found'}, 404
+
+            html_content = render_template('monster_templates/monster_detail.html', monster=monster_data)
+            response = make_response(html_content)
+
+            #html_content = render_template('create_monster.html')
+            #response = monsters_table.get_item(Key={'monster_type': monster_type, 'monster_name': monster_name})
+            #monster = response.get('Item')
+            #if not monster:
+            #    return {'message': 'Monster not found'}, 404
+            #return convert_decimals(monster), 200
+            
+            response.headers['Content-Type'] = 'text/html'
+            return response
         except ClientError as e:
             return {'message': str(e)}, 500
 
     @monsters_namespace.doc('delete_monster')
-    def delete(self, monster_id):
-        """Delete a monster by monster_id"""
+    def delete(self, monster_name, monster_type):
+        """Delete a monster by monster_type and monster_name"""
         try:
-            monsters_table.delete_item(Key={'monster_id': monster_id})
+            monsters_table.delete_item(Key={'monster_name': monster_name, 'monster_type':monster_type})
             return {'message': 'Monster deleted successfully'}, 200
         except ClientError as e:
             return {'message': str(e)}, 500
-
+    
     @monsters_namespace.doc('update_monster')
     @monsters_namespace.expect(monster_model)
-    def put(self, monster_id):
-        """Update a monster by monster_id"""
+    def put(self, monster_name, monster_type):
+        """Update a monster by monster_type and monster_name"""
         data = request.json
+        print("hello")
+        print(data)
         try:
             # Update monster information
             monsters_table.update_item(
-                Key={'monster_id': monster_id},
-                UpdateExpression="set #name=:new_name, inventory_id=:new_inventory_id, reward_money=:new_reward_money,  reward_xp=:new_reward_xp, level=new_level",
-                ExpressionAttributeValues={
-                    ':new_name': data['name'],
-                    ':new_inventory_id': data['inventory_id'],
-                    ':new_reward_money': data['reward_money'],
-                    ':new_reward_xp': data['reward_xp'],
-                    ':new_level': data['level']
-                },
-                ExpressionAttributeNames={
-                    '#name': 'name',
-                }
-            )
+            Key={'monster_name': monster_name, 'monster_type': monster_type},
+            UpdateExpression="SET inventory_id = :new_inventory_id, "
+                             "reward_money = :new_reward_money, reward_xp = :new_reward_xp, #level = :new_level",
+            ExpressionAttributeValues={
+                ':new_inventory_id': data['inventory_id'],
+                ':new_reward_money': data['reward_money'],
+                ':new_reward_xp': data['reward_xp'],
+                ':new_level': data['level']
+            },
+            ExpressionAttributeNames={
+                '#level': 'level'  # Alias for the reserved keyword 'level'
+            }
+        )
+
             return {'message': 'Monster updated successfully'}, 200
         except ClientError as e:
+            print("DynamoDB ClientError:", e.response['Error']['Message'])
             return {'message': str(e)}, 500
+        
+@monsters_namespace.route('/<string:monster_type>/<string:monster_name>/edit')
+@monsters_namespace.param('monster_type', 'The monster type')
+@monsters_namespace.param('monster_name', 'The monster name')
+class EditMonster(Resource):
+    @monsters_namespace.doc('edit_monster_page')
+    def get(self, monster_type, monster_name):
+        """Fetch monster data for editing."""
+        try:
+            # Retrieve monster data using the composite key of monster_type and monster_name
+            response = monsters_table.get_item(Key={
+                'monster_type': monster_type,
+                'monster_name': monster_name
+            })
+            monster = response.get('Item')
+            if not monster:
+                return {'message': 'Monster not found'}, 404
+
+
+            # Define available monster types
+            monster_types = [
+                {"monster_type": "Dragon"},
+                {"monster_type": "Goblin"},
+                {"monster_type": "Troll"},
+                {"monster_type": "Golem"},
+                {"monster_type": "Vampire"}
+            ]
+
+            # Prepare monster data
+            monster_data = {
+                "monster_type": monster['monster_type'],
+                "monster_name": monster['monster_name'],
+                "reward_money": monster.get('reward_money', 0),
+                "inventory_id": monster.get('inventory_id', 0),
+                "reward_xp": monster.get('reward_xp', 0),
+                "level": monster.get('level', "Unknown")
+            }
+
+            # Render the template with monster data; monster types are embedded in the HTML
+            html_content = render_template(
+                'monster_templates/monster_edit.html', 
+                monster=monster_data,
+                monster_types=monster_types
+            )
+            response = make_response(html_content)
+            response.headers['Content-Type'] = 'text/html'
+            return response
+
+        except ClientError as e:
+            return {'message': str(e)}, 500
+
+
