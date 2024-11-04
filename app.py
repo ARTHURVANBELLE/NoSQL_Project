@@ -2,6 +2,10 @@ from flask import Flask, render_template, jsonify, redirect
 from flask_restx import Api
 import DB_tables  # This will execute the creation of the tables
 import dynamoConnect
+from flask import redirect, url_for
+from flask import Blueprint
+
+
 
 # Import the users_namespace from users.py
 from users import users_namespace
@@ -40,7 +44,7 @@ def users():
 # Route for the items page
 @app.route('/items')
 def items():
-    return render_template('create_item.html')
+    return redirect(url_for('v1/items_item_page'))  
 
 # Route for the monsters page
 @app.route('/monsters')
@@ -63,9 +67,11 @@ def login():
     return render_template('login.html')
 
 # Route for the logs page
+
 @app.route('/logs')
 def logs():
-    return render_template('create_logs.html')
+    return redirect(url_for('v1/logs_item_page'))  
+
 
 
 # Route for the admin page
