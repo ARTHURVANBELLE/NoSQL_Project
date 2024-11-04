@@ -27,11 +27,6 @@
         </div>
 
         <div>
-            <label for="inventory_id">Inventory ID:</label>
-            <input type="number" id="inventory_id" name="inventory_id" value="{{ monster.inventory_id }}" required>
-        </div>
-
-        <div>
             <label for="reward_xp">Reward XP:</label>
             <input type="number" id="reward_xp" name="reward_xp" value="{{ monster.reward_xp }}" required>
         </div>
@@ -42,6 +37,9 @@
         </div>
 
         <button type="submit">Update Monster</button>
+        <a href="{{ url_for('v1/inventory_inventory', inventory_id=monster.inventory_id) }}">
+            <button type="button">Inventory</button>
+        </a>
     </form>
 
     <script>

@@ -35,9 +35,6 @@
                 <input type="text" id="newName" placeholder="Name" required>
             </div>
             <div class="form-field">
-                <input type="number" id="newInventoryId" placeholder="Inventory ID" required>
-            </div>
-            <div class="form-field">
                 <input type="number" id="rewardMoney" placeholder="Reward Money" required>
             </div>
             <div class="form-field">
@@ -142,7 +139,6 @@
             const newMonster = {
                 monster_name: document.getElementById('newName').value,
                 monster_type: document.getElementById('myDropdown').value,
-                inventory_id: parseInt(document.getElementById('newInventoryId').value),
                 reward_money: parseInt(document.getElementById('rewardMoney').value),
                 reward_xp: parseInt(document.getElementById('rewardXP').value),
                 level: document.getElementById('level').value

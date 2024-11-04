@@ -12,6 +12,7 @@ from decimal import Decimal
 monsters_namespace = Namespace('v1/monsters', description='Monster operations')
 
 monsters_table = dynamoConnect.dynamodb_resource.Table("monsters")
+inventory_table = dynamoConnect.dynamodb_resource.Table("inventories")
 
 # Define the monster model for the Swagger UI
 monster_model = monsters_namespace.model('Monster', {
@@ -100,17 +101,21 @@ class Monsters(Resource):
 
 
             # Convert fields to required types (DynamoDB type restrictions)
-            data['inventory_id'] = int(data['inventory_id'])
+            data['inventory_id'] = str(uuid.uuid4())
             data['reward_money'] = int(data['reward_money'])
             data['reward_xp'] = int(data['reward_xp'])
             data['level'] = int(data['level'])
+            inventory_data = {
+                'inventory_id': data['inventory_id'],
+                'item_id_dict': {}
+            }
 
-            
 
             # Debugging: Print the final data before insertion
             print("Final data to insert:", data)
             # Insert a new monster into DynamoDB
             monsters_table.put_item(Item=data)
+            inventory_table.put_item(Item=inventory_data)
             print("done")
 
 
