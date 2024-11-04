@@ -49,7 +49,7 @@ def items():
 # Route for the monsters page
 @app.route('/monsters')
 def monsters():
-    return render_template('monsters_templates/monster_list')
+    return render_template('monster_templates/monster_list.html')
 
 # Route for the clans page
 @app.route('/clans')
