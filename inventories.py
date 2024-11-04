@@ -33,8 +33,8 @@ class Inventory(Resource):
             inventory_data = get_items_data(item_id_list)
 
             if not inventory_data:
-                return {'message': 'Inventory not found'}, 404
-            
+                inventory_data = []
+                
             html_content = render_template('inventory.html', inventory_id =inventory_id, inventory_items=inventory_data)
             response = make_response(html_content)
             response.headers['Content-Type'] = 'text/html'
@@ -85,6 +85,22 @@ class Search(Resource):
         response = make_response(html_content)
         response.headers['Content-Type'] = 'text/html'
         return response
+    
+    
+#Separate route for the search functionality
+@inventory_namespace.route('/delete/<string:item_name>/<string:inventory_id>/<string:item_id>')
+class Delete(Resource):
+    def post(self, inventory_id, item_name, item_id):
+        # Delete the item from the inventory
+        delete_item(inventory_id, item_id, item_name)
+        
+        item_id_list = get_inventory_data(inventory_id)
+        inventory_data = get_items_data(item_id_list)
+        
+        html_content = render_template('inventory.html',inventory_id = inventory_id, inventory_items=inventory_data)
+        response = make_response(html_content)
+        response.headers['Content-Type'] = 'text/html'
+        return response
 
 
 def search_items_in_dynamodb(search_query):
@@ -106,11 +122,14 @@ def fill_inventory(inventory_id, new_item_id, new_item_name):
     
     if not inventory:
         item_id_dict = {}
+        print("No inventory found -----------------")
     else:
         item_id_dict = inventory.get('item_id_dict', {})
+        print("Inventory found !! -----------------")
+        print(item_id_dict)
     
     # Add the new item to the inventory
-    item_id_dict[str(new_item_id + "," + new_item_name)] = 1
+    item_id_dict[(new_item_id + "," + new_item_name)] = 1
     
     # Update the inventory table with the new item
     inventory_table.update_item(
@@ -134,6 +153,9 @@ def get_inventory_data(inventory_id):
 def get_items_data(item_id_dict):
     items_data = []
     
+    if not item_id_dict:
+        return items_data
+    
     for item_data in item_id_dict.keys():
         item_name = item_data.split(",")[1]
         item_id = item_data.split(",")[0]
@@ -148,3 +170,30 @@ def get_items_data(item_id_dict):
             items_data.append(item)
     
     return items_data
+
+
+def delete_item(inventory_id, item_id, item_name):
+    # Fetch the inventory data from DynamoDB
+    response = inventory_table.get_item(Key={'inventory_id': inventory_id})
+    inventory = response.get('Item')
+    
+    if not inventory:
+        return False
+
+    item_id_dict = inventory.get('item_id_dict', {})
+    item_id_composed = item_id + "," + item_name
+    
+    # Remove the item from the inventory
+    if item_id_composed in item_id_dict:
+        del item_id_dict[item_id_composed]
+        
+        # Update the inventory table with the new item list
+        inventory_table.update_item(
+            Key={'inventory_id': inventory_id},
+            UpdateExpression='SET item_id_dict = :item_id_dict',
+            ExpressionAttributeValues={':item_id_dict': item_id_dict}
+        )
+        
+        return True
+    
+    return False

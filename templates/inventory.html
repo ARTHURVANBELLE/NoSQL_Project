@@ -70,9 +70,14 @@
             <td>{{ item.item_rarity }}</td>
             <td>{{ item.item_properties }}</td>
             <td>
-                <!-- Actions like Save and Delete (non-functional in this case) -->
-                <button>Save</button>
-                <button>Delete</button>
+                <div style="display: flex; gap: 8px;">
+                    <!-- Actions like Save and Delete (non-functional in this case) -->
+                    <button>Save</button>
+                    
+                    <form method="POST" action="{{ url_for('v1/inventory_delete', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id) }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}

@@ -91,7 +91,7 @@ class Clans(Resource):
         data = request.json
         inventory_data = {
             'inventory_id': '',
-            'item_id_dict': ''
+            'item_id_dict': {}
         }
 
         try:
