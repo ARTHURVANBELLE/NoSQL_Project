@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Basic styles for the log table and search box */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>User Logs</h1>
+
+<div class="search-container">
+    <input type="text" id="userIdInput" placeholder="Search by User ID...">
+    <input type="text" id="dateInput" placeholder="Search by Date/Time...">
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Date & Time</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="logTableBody">
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.user_id }}</td>
+            <td>{{ log.date_time }}</td>
+            <td>{{ log.actions }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    // JavaScript for the search functionality
+    const userIdInput = document.getElementById('userIdInput');
+    const dateInput = document.getElementById('dateInput');
+
+    userIdInput.addEventListener('keyup', filterLogs);
+    dateInput.addEventListener('keyup', filterLogs);
+
+    function filterLogs() {
+        const userIdFilter = userIdInput.value.toLowerCase();
+        const dateFilter = dateInput.value.toLowerCase();
+        const rows = document.querySelectorAll('#logTableBody tr');
+
+        rows.forEach(row => {
+            const userId = row.cells[0].textContent.toLowerCase();
+            const dateTime = row.cells[1].textContent.toLowerCase();
+            const actions = row.cells[2].textContent.toLowerCase();
+
+            const matchesUserId = userId.includes(userIdFilter);
+            const matchesDate = dateTime.includes(dateFilter);
+
+            if (matchesUserId && matchesDate) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

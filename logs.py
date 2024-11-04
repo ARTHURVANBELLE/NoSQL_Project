@@ -37,9 +37,9 @@ class ItemList(Resource):
 @logs_namespace.route('/logs')
 class ItemPage(Resource):
     def get(self):
-        """Render the logs list as an HTML page"""
         logs = get_all_logs()
-        return make_response(render_template('create_logs.html', logs=logs))
+        print("Logs retrieved:", logs)  # Debug statement
+        return make_response(render_template('logs_list.html', logs=logs))
     
 # Endpoint for specific log entry operations
 @logs_namespace.route('/<string:user_id>/<string:date_time>')
