@@ -19,7 +19,7 @@ def login():
         if not username:
             return jsonify({'error': 'Username is required'}), 400
 
-        # Check if user exists
+        # Check if the user exists in the database
         try:
             response = users_table.scan(
                 FilterExpression=boto3.dynamodb.conditions.Attr('name').eq(username)
@@ -27,23 +27,23 @@ def login():
             if 'Items' not in response or not response['Items']:
                 return jsonify({'error': 'User not found'}), 404
             
-            user = response['Items'][0]  # Assume username is unique
-            user_id = user['user_id']
+            user = response['Items'][0]  # We're gonna assume there's only one user with that name
+            user_id = user['user_id'] # Get the user_id from the user record
             
             # Log the login with user_id and current timestamp
-            current_time = datetime.utcnow().isoformat() + 'Z'
-            log_login(user_id, current_time)
+            current_time = datetime.now(datetime.timezone.utc).isoformat() + 'Z' # Format: '2021-07-01T12:00:00Z' Allows for easy sorting
+            log_login(user_id, current_time) 
             
-            # Redirect to actions input page with user_id
+            # Redirect to actions input page with user_id where we can log actions
             return redirect(url_for('auth.actions', user_id=user_id))
         except ClientError as e:
             return jsonify({'error': str(e)}), 500
 
     # Render the login page on GET request
-    return render_template('login.html')
+    return render_template('login.html') 
 
-def log_login(user_id, date_time):
-    """Log a user login action."""
+def log_login(user_id, date_time): 
+    """Log a user login action."""#There's not password right now, it's just for show
     try:
         log = {
             'user_id': user_id,
@@ -59,7 +59,7 @@ def actions(user_id):
     if request.method == 'POST':
         action = request.form.get('action')
         if action:
-            current_time = datetime.utcnow().isoformat() + 'Z'
+            current_time = datetime.now(datetime.timezone.utc).isoformat() + 'Z'
             log_action(user_id, current_time, action)
             return jsonify({'message': 'Action logged successfully'}), 201
         else:

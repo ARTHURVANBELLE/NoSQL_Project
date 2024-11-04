@@ -7,14 +7,14 @@ from flask_restx import Api, Resource, fields, Namespace
 # Initialize DynamoDB and set up Namespace and Table
 table_name = "items"
 items_table = dynamoConnect.dynamodb_resource.Table(table_name)
-items_namespace = Namespace('items', description='API for managing items')
+items_namespace = Namespace('v1/items', description='API for managing items')
 
 # Define Item model for documentation and payload validation
 item_model = items_namespace.model('Item', {
     'item_name': fields.String(required=True, description='Item name'),
     'item_id': fields.String(required=True, description='Item ID (eg: consumable001)'),
     'item_rarity': fields.String(required=True, description='Item rarity'),
-    'item_properties': fields.List(fields.String, required=True, description='Item properties') 
+    'item_properties': fields.List(fields.String, required=False, description='Item properties') 
 })
 
 
@@ -31,14 +31,14 @@ class ItemList(Resource):
     def post(self):
         """Create a new item"""
         data = items_namespace.payload
-        print("Received payload:", data)  # For debugging
+        print("Received payload:", data)  # Used for some debugging
         create_item(data['item_name'], data['item_id'], data['item_rarity'], data['item_properties'])
         return data, 201
 
 
 
 
-# Endpoint for the HTML page at '/items_api/items'
+# Endpoint for the HTML page at '/items_api/items where we can see it nicely'
 @items_namespace.route('/items')
 class ItemPage(Resource):
     def get(self):
@@ -46,7 +46,7 @@ class ItemPage(Resource):
         items = get_all_items()
         return make_response(render_template('create_item.html', items=items))
     
-# Update the Item resource class in your Flask app
+# Endpoint for specific item entry operations (Delete/modify)
 @items_namespace.route('/<string:item_id>/<string:item_name>')
 class Item(Resource):
     def get(self, item_id, item_name):
@@ -67,7 +67,7 @@ class Item(Resource):
     @items_namespace.expect(item_model)
     @items_namespace.marshal_with(item_model)
     def put(self, item_id, item_name):
-        """Update an existing item"""
+        """Update an existing item""" #We'll delete the old item and create a new one with the updated data
         try:
             data = request.json
             new_item_id = data.get('new_item_id', item_id)
