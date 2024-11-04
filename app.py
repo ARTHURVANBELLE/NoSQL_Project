@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, redirect
 from flask_restx import Api
 import DB_tables  # This will execute the creation of the tables
 import dynamoConnect
@@ -22,7 +22,50 @@ api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(inventory_namespace, path='/inventory_api')
 
+# Route for the home page
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
+# Route for the users page
+@app.route('/users')
+def users():
+    return render_template('user_templates/user_list.html')
+
+# Route for the items page
+@app.route('/items')
+def items():
+    return render_template('create_item.html')
+
+# Route for the monsters page
+@app.route('/monsters')
+def monsters():
+    return render_template('monsters_templates/monster_list')
+
+# Route for the clans page
+@app.route('/clans')
+def clans():
+    return render_template('clan_templates/clan_list.html')
+
+# Route for the inventories page
+@app.route('/inventories')
+def inventories():
+    return render_template('inventory.html')
+
+# Route for the login page
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+# Route for the admin page
+@app.route('/admin')
+def admin():
+    return redirect("http://localhost:8001")
+
+# Route for the api page
+@app.route('/api')
+def api_redirect():
+    return redirect("http://localhost:5000")
 
 # with app.app_context():
 #     print("Registered routes:")
