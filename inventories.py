@@ -46,11 +46,14 @@ class Inventory(Resource):
             response.headers['Content-Type'] = 'text/html'
             return response
     
-@inventory_namespace.route('/add_item/<string:item_name>/<string:inventory_id>/<string:item_id>')
+@inventory_namespace.route('/add_item')
 @inventory_namespace.doc('add_item')
 class AddItem(Resource):
-    def post(self, item_name, item_id, inventory_id):
+    def post(self):
         """Add an item to the inventory"""
+        item_name = request.form.get('item_name')
+        inventory_id = request.form.get('inventory_id')
+        item_id = request.form.get('item_id')
         try:
             # Update the inventory table to add the item name to the item_id_list
             fill_inventory(inventory_id,item_id , item_name)
@@ -67,16 +70,17 @@ class AddItem(Resource):
 
 
 #Separate route for the search functionality
-@inventory_namespace.route('/search/<string:inventory_id>')
+@inventory_namespace.route('/search')
 class Search(Resource):
-    def post(self, inventory_id):
+    def post(self):
         search_query = request.form.get('search_query')
+        inventory_id = request.form.get('inventory_id')
         search_results = []
         
         if search_query:
             # Fetch the search results from DynamoDB
             search_results = search_items_in_dynamodb(search_query.lower())
-        
+                    
         item_id_list = get_inventory_data(inventory_id)
         inventory_data = get_items_data(item_id_list)
 
@@ -87,11 +91,15 @@ class Search(Resource):
         return response
     
     
-#Separate route for the search functionality
-@inventory_namespace.route('/delete/<string:item_name>/<string:inventory_id>/<string:item_id>')
+#Separate route for the search functionality /<string:item_name>/<string:inventory_id>/<string:item_id> , inventory_id, item_name, item_id
+@inventory_namespace.route('/delete')
 class Delete(Resource):
-    def post(self, inventory_id, item_name, item_id):
+    def post(self):
         # Delete the item from the inventory
+        item_name = request.form.get('item_name')
+        inventory_id = request.form.get('inventory_id')
+        item_id = request.form.get('item_id')
+        
         delete_item(inventory_id, item_id, item_name)
         
         item_id_list = get_inventory_data(inventory_id)
@@ -103,10 +111,14 @@ class Delete(Resource):
         return response
     
     
-@inventory_namespace.route('/update/<string:item_name>/<string:item_id>/<string:inventory_id>')
+    #/<string:item_name>/<string:item_id>/<string:inventory_id>
+@inventory_namespace.route('/update')
 class Update(Resource):
-    def post(self, inventory_id, item_name, item_id):
+    def post(self):
         quantity = request.form.get('newItemQuantity')
+        inventory_id = request.form.get('inventory_id')
+        item_id = request.form.get('item_id')
+        item_name = request.form.get('item_name')
         
         if quantity and int(quantity) > 0:
             update_item(inventory_id, item_id, item_name, int(quantity))
@@ -176,11 +188,8 @@ def get_items_data(item_id_dict):
         response = item_table.get_item(Key={'item_id': item_id, 'item_name': item_name})
         item = response.get('Item')
         
-        
         if item:
             item['item_quantity'] = item_id_dict[item_data]
-            print("quantity -----------------")
-            print(item['item_quantity'])
             items_data.append(item)
     
     return items_data

@@ -11,8 +11,9 @@
 <h1>Inventory Management : "{{inventory_id}}"</h1>
 
 <!-- Search Form -->
-<form method="POST" action="{{ url_for('v1/inventory_search', inventory_id=inventory_id) }}">
+<form method="POST" action="{{ url_for('v1/inventory_search') }}">
     <input type="text" name="search_query" placeholder="Search for items..." required>
+    <input type="hidden" name="inventory_id" value="{{ inventory_id }}">
     <button type="submit">Search</button>
 </form>
 
@@ -35,10 +36,13 @@
                 <td>{{ item.item_id }}</td>
                 <td>{{ item.item_name }}</td>
                 <td>{{ item.item_rarity }}</td>
-                <td>{{ item.item_proporties }}</td>
+                <td>{{ item.item_properties }}</td>
                 <td>
-                    <form method="POST" action="{{ url_for('v1/inventory_add_item', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id) }}">
+                    <form method="POST" action="{{ url_for('v1/inventory_add_item') }}">
                         <button type="submit">Add to Inventory</button>
+                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                        <input type="hidden" name="inventory_id" value="{{ inventory_id }}">
+                        <input type="hidden" name="item_id" value="{{ item.item_id }}">
                     </form>
                 </td>
                 
@@ -67,8 +71,11 @@
             <td>{{ item.item_id }}</td>
             <td>{{ item.item_name }}</td>
             <td>
-                <form method="POST" action="{{ url_for('v1/inventory_update', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id, quantity=item.item_quantity) }}">
+                <form method="POST" action="{{ url_for('v1/inventory_update') }}">
                     <input type="number" name="newItemQuantity" placeholder={{ item.item_quantity }}>
+                    <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                    <input type="hidden" name="inventory_id" value="{{ inventory_id }}">
+                    <input type="hidden" name="item_id" value="{{ item.item_id }}">
                     <button type="submit">Update</button>
                 </form>
             </td>
@@ -76,7 +83,11 @@
             <td>{{ item.item_properties }}</td>
             <td>
                 <div style="display: flex; gap: 8px;">
-                    <form method="POST" action="{{ url_for('v1/inventory_delete', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id) }}">
+                    <form method="POST" action="{{ url_for('v1/inventory_delete') }}">
+                        <!-- Use hidden inputs to send data in the body -->
+                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                        <input type="hidden" name="inventory_id" value="{{ inventory_id }}">
+                        <input type="hidden" name="item_id" value="{{ item.item_id }}">
                         <button type="submit">Delete</button>
                     </form>
                 </div>
