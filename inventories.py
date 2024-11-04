@@ -101,6 +101,23 @@ class Delete(Resource):
         response = make_response(html_content)
         response.headers['Content-Type'] = 'text/html'
         return response
+    
+    
+@inventory_namespace.route('/update/<string:item_name>/<string:item_id>/<string:inventory_id>')
+class Update(Resource):
+    def post(self, inventory_id, item_name, item_id):
+        quantity = request.form.get('newItemQuantity')
+        
+        if quantity and int(quantity) > 0:
+            update_item(inventory_id, item_id, item_name, int(quantity))
+        
+        item_id_list = get_inventory_data(inventory_id)
+        inventory_data = get_items_data(item_id_list)
+        
+        html_content = render_template('inventory.html',inventory_id = inventory_id, inventory_items=inventory_data)
+        response = make_response(html_content)
+        response.headers['Content-Type'] = 'text/html'
+        return response
 
 
 def search_items_in_dynamodb(search_query):
@@ -122,12 +139,9 @@ def fill_inventory(inventory_id, new_item_id, new_item_name):
     
     if not inventory:
         item_id_dict = {}
-        print("No inventory found -----------------")
     else:
         item_id_dict = inventory.get('item_id_dict', {})
-        print("Inventory found !! -----------------")
-        print(item_id_dict)
-    
+        
     # Add the new item to the inventory
     item_id_dict[(new_item_id + "," + new_item_name)] = 1
     
@@ -171,7 +185,6 @@ def get_items_data(item_id_dict):
     
     return items_data
 
-
 def delete_item(inventory_id, item_id, item_name):
     # Fetch the inventory data from DynamoDB
     response = inventory_table.get_item(Key={'inventory_id': inventory_id})
@@ -186,6 +199,32 @@ def delete_item(inventory_id, item_id, item_name):
     # Remove the item from the inventory
     if item_id_composed in item_id_dict:
         del item_id_dict[item_id_composed]
+        
+        # Update the inventory table with the new item list
+        inventory_table.update_item(
+            Key={'inventory_id': inventory_id},
+            UpdateExpression='SET item_id_dict = :item_id_dict',
+            ExpressionAttributeValues={':item_id_dict': item_id_dict}
+        )
+        
+        return True
+    
+    return False
+
+def update_item(inventory_id, item_id, item_name, quantity):
+    # Fetch the inventory data from DynamoDB
+    response = inventory_table.get_item(Key={'inventory_id': inventory_id})
+    inventory = response.get('Item')
+    
+    if not inventory:
+        return False
+
+    item_id_dict = inventory.get('item_id_dict', {})
+    item_id_composed = item_id + "," + item_name
+    
+    # Update the quantity of the item in the inventory
+    if item_id_composed in item_id_dict:
+        item_id_dict[item_id_composed] = quantity
         
         # Update the inventory table with the new item list
         inventory_table.update_item(
