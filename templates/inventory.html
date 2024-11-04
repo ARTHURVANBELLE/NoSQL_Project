@@ -66,14 +66,16 @@
         <tr>
             <td>{{ item.item_id }}</td>
             <td>{{ item.item_name }}</td>
-            <td><input type="number" id="newItemQuantity" placeholder={{ item.item_quantity }}></td>
+            <td>
+                <form method="POST" action="{{ url_for('v1/inventory_update', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id, quantity=item.item_quantity) }}">
+                    <input type="number" name="newItemQuantity" placeholder={{ item.item_quantity }}>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
             <td>{{ item.item_rarity }}</td>
             <td>{{ item.item_properties }}</td>
             <td>
                 <div style="display: flex; gap: 8px;">
-                    <!-- Actions like Save and Delete (non-functional in this case) -->
-                    <button>Save</button>
-                    
                     <form method="POST" action="{{ url_for('v1/inventory_delete', item_name=item.item_name, inventory_id=inventory_id, item_id=item.item_id) }}">
                         <button type="submit">Delete</button>
                     </form>
