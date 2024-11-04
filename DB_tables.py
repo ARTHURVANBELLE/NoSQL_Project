@@ -98,8 +98,8 @@ inventory_attributeDefinitions = [
         {'AttributeName': 'inventory_id', 'AttributeType': 'S'}
     ]
 
-# Items are composed of an ID (partition key) representing the type and the nbr of the item (for ex : "W1" for the 1st weapon)
-# & of a name (range key) that can be the same for mutliple items
+# Items are composed of an ID reprensting the type (Eg weapon, armor, potion, etc) (hash key)
+# & of a name (range key) that can not be the same as another item of the same type
 
 table_Items = "items"
 item_keySchema = [
@@ -110,6 +110,17 @@ item_keySchema = [
 item_attributeDefinitions = [
         {'AttributeName': 'item_id', 'AttributeType': 'S'},
         {'AttributeName': 'item_name', 'AttributeType': 'S'}
+    ]
+
+table_Logs = "logs"
+logs_keySchema = [
+        {'AttributeName': 'user_id', 'KeyType': 'HASH'},
+        {'AttributeName': 'date_time', 'KeyType': 'RANGE'},
+        
+    ]
+logs_attributeDefinitions = [
+        {'AttributeName': 'user_id', 'AttributeType': 'S'},
+        {'AttributeName': 'date_time', 'AttributeType': 'S'}
     ]
 
 # table_Weapons = "weapons"
@@ -137,6 +148,8 @@ create_table(table_Clans, clan_keySchema, clan_attributeDefinitions)
 create_table(table_Monsters, monster_keySchema, monster_attributeDefinitions)
 create_table(table_Inventories, inventory_keySchema, inventory_attributeDefinitions)
 create_table(table_Items, item_keySchema, item_attributeDefinitions)
+create_table(table_Logs, logs_keySchema, logs_attributeDefinitions)
+
 # create_table(table_Weapons, weapon_keySchema, weapon_attributeDefinitions)
 # create_table(table_Armors, armor_keySchema, armor_attributeDefinitions)
 

@@ -7,6 +7,8 @@ import dynamoConnect
 from users import users_namespace
 from items import items_namespace
 from clans import clans_namespace
+from logs import logs_namespace
+from auth import auth
 
 from inventories import inventory_namespace
 from monsters import monsters_namespace
@@ -21,6 +23,9 @@ api.add_namespace(clans_namespace, path='/clans_api')
 api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(monsters_namespace, path='/monsters_api')
 api.add_namespace(inventory_namespace, path='/inventory_api')
+api.add_namespace(logs_namespace, path='/logs_api')
+
+app.register_blueprint(auth)
 
 # Route for the home page
 @app.route('/home')
@@ -56,6 +61,12 @@ def inventories():
 @app.route('/login')
 def login():
     return render_template('login.html')
+
+# Route for the logs page
+@app.route('/logs')
+def logs():
+    return render_template('create_logs.html')
+
 
 # Route for the admin page
 @app.route('/admin')

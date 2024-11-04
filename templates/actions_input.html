@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Actions Input</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Enter Action for User {{ user_id }}</h2>
+    <form action="{{ url_for('auth.actions', user_id=user_id) }}" method="POST">
+        <label for="action">Action:</label>
+        <input type="text" id="action" name="action" required>
+        <button type="submit">Submit Action</button>
+    </form>
+</body>
+</html>
