@@ -67,12 +67,9 @@ def login():
     return render_template('login.html')
 
 # Route for the logs page
-
 @app.route('/logs')
 def logs():
-    return redirect(url_for('v1/logs_item_page'))  
-
-
+    return redirect(url_for('v1/logs_item_page'))
 
 # Route for the admin page
 @app.route('/admin')
