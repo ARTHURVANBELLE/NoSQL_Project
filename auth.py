@@ -31,7 +31,7 @@ def login():
             user_id = user['user_id'] # Get the user_id from the user record
             
             # Log the login with user_id and current timestamp
-            current_time = datetime.now(datetime.timezone.utc).isoformat() + 'Z' # Format: '2021-07-01T12:00:00Z' Allows for easy sorting
+            current_time = datetime.utcnow().isoformat() + 'Z'
             log_login(user_id, current_time) 
             
             # Redirect to actions input page with user_id where we can log actions
@@ -59,7 +59,7 @@ def actions(user_id):
     if request.method == 'POST':
         action = request.form.get('action')
         if action:
-            current_time = datetime.now(datetime.timezone.utc).isoformat() + 'Z'
+            current_time = datetime.utcnow().isoformat() + 'Z'
             log_action(user_id, current_time, action)
             return jsonify({'message': 'Action logged successfully'}), 201
         else:
