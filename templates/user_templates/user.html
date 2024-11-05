@@ -55,6 +55,8 @@
 
             <!-- Delete Button -->
             <button onclick="deleteUser('{{ user.user_id }}')">Delete</button>
+
+            <button onclick="userPage()">Go to user page</button>
         </div>
     </div>
 
@@ -86,6 +88,10 @@
                 .catch(error => console.error('Error:', error));
             }
         }
+
+        function userPage(){
+                window.location.href = `/users`;
+            }
     </script>
 </body>
 </html>
