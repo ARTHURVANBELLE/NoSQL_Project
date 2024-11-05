@@ -23,7 +23,7 @@ user_model = users_namespace.model('User', {
     'name': fields.String(required=True, description='User name'),
     'clan_id': fields.String(required=False, description='Clan ID'),
     'money': fields.Integer(required=True, description='User money'),
-    'inventory_id': fields.Integer(required=True, description='Inventory ID'),
+    'inventory_id': fields.String(required=True, description='Inventory ID'),
     'xp': fields.Integer(required=True, description='User experience points'),
     'elo': fields.Integer(required=True, description='User ranking/elo'),
     'user_class': fields.String(required=True, description='User class')
@@ -258,12 +258,11 @@ class User(Resource):
                 # Update user information
                 users_table.update_item(
                     Key={'user_id': user_id},
-                    UpdateExpression="set #name=:new_name, clan_id=:new_clan_id, money=:new_money, inventory_id=:new_inventory_id, xp=:new_xp, elo=:new_elo, user_class=:new_user_class",
+                    UpdateExpression="set #name=:new_name, clan_id=:new_clan_id, money=:new_money, xp=:new_xp, elo=:new_elo, user_class=:new_user_class",
                     ExpressionAttributeValues={
                         ':new_name': data['name'],
                         ':new_clan_id': data['clan_id'],
                         ':new_money': data['money'],
-                        ':new_inventory_id': data['inventory_id'],
                         ':new_xp': data['xp'],
                         ':new_elo': data['elo'],
                         ':new_user_class': data['user_class']
